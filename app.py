@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 counter = 0
 
-@app.route('/process/', methods=['POST'])
+@app.route('/process/', methods=['POST','GET'])
 def backend():
     text = request.args.get('text', "No text provided")
     global counter
