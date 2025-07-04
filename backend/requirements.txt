@@ -1,4 +1,4 @@
-Flask==3.0.0
-gunicorn==21.2.0
-NLTK==3.8.1
-numpy==1.26.4
+Flask
+gunicorn
+NLTK
+numpy
