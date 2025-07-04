@@ -9,7 +9,7 @@
                     synth.triggerAttackRelease("C4", "8n");
                 });
                 function fetchFromBackend(text) {
-                    const hello = fetch(`https://surprisal.onrender.com/?text=${text}`, {
+                    const hello = fetch(`https://surprisal.onrender.com/process/?text=${text}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
