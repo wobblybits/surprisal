@@ -1,11 +1,20 @@
 from flask import Flask, request, render_template
+import json
 
 app = Flask(__name__)
+
+counter = 0
 
 @app.route('/process/', methods=['POST'])
 def backend():
     text = request.args.get('text', "No text provided")
-    return "{\"received\": " + text + ", \"response\": \"Hello, World!\"}";
+    global counter
+    counter += 1
+    json_response = {
+        "received": text,
+        "response": "Hello, World! #" + counter
+    }
+    return json.dumps(json_response)
 
 @app.route('/')
 def frontend():

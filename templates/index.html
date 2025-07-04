@@ -8,6 +8,12 @@
                 playButton.addEventListener("click", () => {
                     synth.triggerAttackRelease("C4", "8n");
                 });
+                const fetchButton = document.getElementById("fetchButton");
+                let counter = 0;
+                fetchButton.addEventListener("click", () => {
+                    fetchFromBackend("Hello back there! #" + counter);
+                    counter++;
+                });
                 function fetchFromBackend(text) {
                     const hello = fetch(`https://surprisal.onrender.com/process/?text=${text}`, {
                         method: 'POST',
@@ -29,7 +35,8 @@
     </head>
     <body>
         <h1>Index.html</h1>
-        <button id="playButton">Play</button>
+        <button id="playButton">Play Sound</button>
+        <button id="fetchButton">Fetch from Backend</button>
         <div id="result">
 
         </div>
