@@ -11,8 +11,9 @@ def backend():
     global counter
     counter += 1
     json_response = {
-        "received": text,
-        "response": "Hello, World! #" + counter
+        "received": str(text),
+        "response": "Hello, World!",
+        "counter": counter
     }
     return json.dumps(json_response)
 
