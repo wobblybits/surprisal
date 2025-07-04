@@ -24,9 +24,7 @@
                     })
                         .then(response => response.json())
                         .then(data => {
-                            data.forEach(element => {
-                                document.getElementById("result").innerHTML += element.toString() + "<br>";
-                            });
+                            document.getElementById("result").innerHTML += JSON.stringify(data) + "<br>";
                         });
                 }
                 fetchFromBackend("Hello back there!");
