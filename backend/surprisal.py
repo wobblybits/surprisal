@@ -9,4 +9,4 @@ def backend():
 
 @app.route('/')
 def frontend():
-    return render_template('../frontend/index.html')
+    return render_template('index.html')
