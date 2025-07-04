@@ -4,7 +4,8 @@ app = Flask(__name__)
 
 @app.route('/process/')
 def backend():
-    text = request.args.get('text')
+
+    text = request.args.get('text', "No text provided")
     return "{\"received\": " + text + ", \"response\": \"Hello, World!\"}";
 
 @app.route('/')
