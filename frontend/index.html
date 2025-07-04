@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <script src="http://unpkg.com/tone"></script>
+        <script>
+            const synth = new Tone.Synth().toDestination();
+            window.onload = () => {
+                const playButton = document.getElementById("playButton");
+                playButton.addEventListener("click", () => {
+                    synth.triggerAttackRelease("C4", "8n");
+                });
+                function fetchFromBackend(text) {
+                    const hello = fetch(`https://surprisal.onrender.com/?text=${text}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                            },
+                        body: JSON.stringify({text: text})
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            data.forEach(element => {
+                                document.getElementById("result").innerHTML += element.toString() + "<br>";
+                            });
+                        });
+                }
+                fetchFromBackend("Hello back there!");
+            };
+        </script>
+    </head>
+    <body>
+        <button id="playButton">Play</button>
+        <div id="result">
+
+        </div>
+    </body>
+</html>
