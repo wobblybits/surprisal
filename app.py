@@ -5,18 +5,13 @@ import surprisal
 app = Flask(__name__)
 
 counter = 0
+g = surprisal.AutoHuggingFaceModel.from_pretrained(model_id="gpt2")
 
 @app.route('/process/', methods=['POST','GET'])
 def backend():
     text = request.args.get('text', "No text provided")
-    global counter
-    counter += 1
-    json_response = {
-        "received": str(text),
-        "response": "Hello, World!",
-        "counter": counter
-    }
-    return json.dumps(json_response)
+    surps = [*g.surprise([text])]
+    return json.dumps({"surprisals": surps[0].surprisals, "tokens": surps[0].tokens})
 
 @app.route('/')
 def frontend():
@@ -26,4 +21,4 @@ def frontend():
 def test():
     g = surprisal.AutoHuggingFaceModel.from_pretrained(model_id="gpt2")
     surps = [*g.surprise(["Hello, World!"])]
-    return json.dumps(surps)
+    return json.dumps({"surprisals": surps[0].surprisals, "tokens": surps[0].tokens})

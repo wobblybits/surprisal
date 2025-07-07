@@ -3,19 +3,23 @@
         <script src="https://unpkg.com/tone"></script>
         <script>
             const synth = new Tone.Synth().toDestination();
+
             window.onload = () => {
+
                 const playButton = document.getElementById("playButton");
                 playButton.addEventListener("click", () => {
                     synth.triggerAttackRelease("C4", "8n");
                 });
+
+                const userInput = document.getElementById("userInput");
+
                 const fetchButton = document.getElementById("fetchButton");
-                let counter = 0;
                 fetchButton.addEventListener("click", () => {
-                    fetchFromBackend("Hello back there! #" + counter);
-                    counter++;
+                    fetchFromBackend(userInput.value);
                 });
+
                 function fetchFromBackend(text) {
-                    const hello = fetch(`https://surprisal.onrender.com/process/?text=${text}`, {
+                    const hello = fetch(`https://surprisal.onrender.com/process/`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -33,6 +37,7 @@
     </head>
     <body>
         <h1>Index.html</h1>
+        <textarea id="userInput" rows="4" cols="50"></textarea>
         <button id="playButton">Play Sound</button>
         <button id="fetchButton">Fetch from Backend</button>
         <div id="result">
