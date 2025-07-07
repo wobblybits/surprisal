@@ -2,4 +2,4 @@ Flask
 gunicorn
 NLTK
 numpy
-surprisal
+surprisal[transformers]
