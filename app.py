@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template
 import json
+import surprisal
 
 app = Flask(__name__)
 
@@ -20,3 +21,9 @@ def backend():
 @app.route('/')
 def frontend():
     return render_template('index.html')
+
+@app.route('/test/')
+def test():
+    g = surprisal.AutoHuggingFaceModel.from_pretrained(model_id="gpt2")
+    surps = [*g.surprise(["Hello, World!"])]
+    return json.dumps(surps)
