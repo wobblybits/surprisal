@@ -11,7 +11,10 @@ g = surprisal.AutoHuggingFaceModel.from_pretrained(model_id="gpt2")
 def backend():
     text = request.args.get('text', "No text provided")
     surps = [*g.surprise([text])]
-    return json.dumps({"surprisals": surps[0].surprisals, "tokens": surps[0].tokens})
+    return json.dumps({
+        surprisals: [*surps[0].surprisals],
+        tokens: [*surps[0].tokens],
+    })
 
 @app.route('/')
 def frontend():

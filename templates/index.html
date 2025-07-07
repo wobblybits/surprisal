@@ -3,12 +3,19 @@
         <script src="https://unpkg.com/tone"></script>
         <script>
             const synth = new Tone.Synth().toDestination();
+            let currentVector = [1,2,3,4,5,6,7,8,9,10];
+            Tone.Transport.start(0);
 
             window.onload = () => {
 
                 const playButton = document.getElementById("playButton");
                 playButton.addEventListener("click", () => {
-                    synth.triggerAttackRelease("C4", "8n");
+                    playVector(currentVector);
+                });
+
+                const stopButton = document.getElementById("stopButton");
+                stopButton.addEventListener("click", () => {
+                    synth.stop();
                 });
 
                 const userInput = document.getElementById("userInput");
@@ -19,7 +26,7 @@
                 });
 
                 function fetchFromBackend(text) {
-                    const hello = fetch(`https://surprisal.onrender.com/process/`, {
+                    const hello = fetch(`/process/?text=${text}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -29,16 +36,33 @@
                         .then(response => response.json())
                         .then(data => {
                             document.getElementById("result").innerHTML += JSON.stringify(data) + "<br>";
+                            currentVector = data;
+                            playVector(currentVector);
                         });
                 }
-                fetchFromBackend("Hello back there!");
+                // fetchFromBackend("Hello back there!");
+
+
+                function playVector(vector) {
+                    console.log(vector);
+                    const notes = vector.map(d => Tone.Frequency("C3").transpose(Math.round(d)));
+                    console.log(notes);
+                    var seq = new Tone.Sequence(function(time, note){
+                        synth.triggerAttackRelease(note, "8n", time);
+                    }, notes, "4n");
+                    seq.loop = false;
+                    seq.start(0);
+                    Tone.start();
+                }
+                
             };
         </script>
     </head>
     <body>
         <h1>Index.html</h1>
         <textarea id="userInput" rows="4" cols="50"></textarea>
-        <button id="playButton">Play Sound</button>
+        <button id="playButton">Play</button>
+        <button id="stopButton">Stop</button>
         <button id="fetchButton">Fetch from Backend</button>
         <div id="result">
 
