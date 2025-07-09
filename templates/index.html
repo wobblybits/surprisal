@@ -35,9 +35,8 @@
                     })
                         .then(response => response.json())
                         .then(data => {
-                            document.getElementById("result").innerHTML += JSON.stringify(data) + "<br>";
-                            currentVector = data;
-                            playVector(currentVector);
+                            document.getElementById("result").innerHTML += JSON.stringify(data) + "<br>"
+                            playMelody(data);
                         });
                 }
                 // fetchFromBackend("Hello back there!");
@@ -53,6 +52,21 @@
                     seq.loop = false;
                     seq.start(0);
                     Tone.start();
+                }
+
+                async function playMelody(data) {
+                    await Tone.start();
+                    let surprisals = data.surprisals;
+                    let durations = data.lengths;
+                    let volumes = data.frequencies_inverted;
+                    let notes = surprisals.map(d => Tone.Frequency("C4").transpose(Math.round(d)))
+                    let delay = Tone.now();
+                    for(let i = 0; i < surprisals.length; i++) {
+                
+                        delay += durations[i] / 8;
+                        synth.volume.value = volumes[i] / 2;
+                        synth.triggerAttackRelease(notes[i], durations[i] / 8, delay);  
+                    }
                 }
                 
             };
