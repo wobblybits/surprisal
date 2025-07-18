@@ -1,0 +1,202 @@
+<html>
+  <head>
+    <style>
+      @font-face {
+        font-family: "Portfolio";
+        src: url("Web437_Portfolio_6x8.woff") format('woff');
+      }
+      body {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+      }
+      #calculator {
+        display: flex;
+        border-right: 1px solid black;
+        flex-direction: column;
+        flex-wrap: wrap;
+        width: 50%;
+        background: gray;
+        height: 100%;
+      }
+      #display {
+        padding: 2em 2em 0;
+        height: 34%;
+      }
+      #display textarea {
+        background: #aacc99;
+        font-family: "Portfolio", Monospace;
+        width: 100%;
+        height: 100%;
+        padding: 1em;
+        outline: none;
+        font-size: 16px;
+        line-height: 24px;
+      }
+      #display textarea:focus {
+        outline: none;
+      }
+      #buttons {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+        flex-grow: 2;
+        padding: 2em;
+      }
+      #buttons > div {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        flex-grow: 2;
+        border: 1px solid white;
+        background: plum;
+        padding: 4px;
+      }
+      #buttons > div > div {
+        display: flex;
+        flex-grow: 2;
+        flex-direction: column;
+        flex-wrap: wrap;
+        width: 48px;
+        height: 48px;
+        border: 2px outset gray;
+        background: pink;
+        margin: 2px;
+        width: calc(100% - 8px);
+      }
+      #buttons #translate {
+        width: 100%
+      }
+      #buttons > div > div:hover {
+        background: purple;
+        border: 2px inset gray;
+      }
+      #buttons > div > div#submit {
+        background: orange;
+      }
+      #buttons > div > div#submit:hover {
+        background: red;
+      }
+      #keyboard {
+        border-left: 2px solid black;
+        width: 50%;
+        position: relative;
+      }
+      #keyboard > div {
+        position: absolute;
+        left: 0;
+        text-align: right;
+        padding-right: 2em;
+        align-content: center;
+      }
+      #keyboard .white-key:hover {
+        background: pink;
+      }
+      #keyboard .black-key:hover {
+        background: purple;
+      }
+      #keyboard .white-key {
+        background: white;
+        border: 2px solid black;
+        border-left: none;
+        height: 6.5%;
+        width: calc(100% - 2em); /* subtract padding*/
+      }
+      #keyboard .black-key {
+        background: black;
+        width: 50%;
+        height: 6%;
+        z-index: 99;
+        border: 2px solid white;
+        border-left: none;
+        left: 0px;
+        color: white;
+      }
+    </style>
+    <script>
+      window.onload = () => {
+        const instruments = ["piano", "theramin", "harp", "flute"];
+        const scales = ["major", "minor", "pentatonic", "chromatic", "continuous"];
+        const models = ["gpt2", "gpt3", "gpt4"];
+        
+        const instrument_container = document.getElementById("instruments");
+        
+        for (i in instruments) {
+          const button = document.createElement("div");
+          button.id = instruments[i];
+          button.innerHTML = instruments[i];
+          instrument_container.appendChild(button);
+        }
+        
+        const scales_container = document.getElementById("scales");
+        for (i in scales) {
+          const button = document.createElement("div");
+          button.id = scales[i];
+          button.innerHTML = scales[i];
+          scales_container.appendChild(button);
+        }
+        
+        const models_container = document.getElementById("models");
+        for (i in models) {
+          const button = document.createElement("div");
+          button.id = models[i];
+          button.innerHTML = models[i];
+          models_container.appendChild(button);
+        }
+        
+        const notes = ["A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab"];
+        
+        let startingNote = "C";
+        let startingPitch = notes.indexOf(startingNote);
+        let startingOctave = 2;
+        
+        const piano_container = document.getElementById("keyboard");
+        let spacing = 0;
+        const numOctaves = 2;
+        const numKeysPastOctave = 0;
+        
+        for (var i = 0; i < numOctaves*12 + numKeysPastOctave; i++) {
+          const key = document.createElement("div");
+          const note = notes[(i+startingPitch) % notes.length];
+          key.id = note + (startingOctave + Math.floor(i/12));
+          if (note.length > 1) {
+            key.style.bottom = (100*(spacing-.5)/(numOctaves * 7 + numKeysPastOctave)) + "%";
+            key.classList.add("black-key");
+          }
+          else {
+            key.style.bottom = (100*spacing/(numOctaves * 7 + numKeysPastOctave)) + "%";
+            key.classList.add("white-key");
+            spacing++;
+          }
+          key.innerHTML = key.id;
+          piano_container.appendChild(key);
+        }
+      }  
+    </script>
+  </head>
+  <body>
+    <div id="calculator">
+      <div id="display">
+        <textarea placeholder="Type something"></textarea>
+      </div>
+      <div id="buttons">
+        <div id="scales">
+        
+        </div>
+        <div id="instruments">
+        
+        </div>
+        <div id="models">
+        
+        </div>
+        <div id="translate">
+          <div id="submit">Compose</div>
+        </div>
+      </div>
+    </div>
+    <div id="keyboard">
+      
+    </div>
+  </body>
+</html>
