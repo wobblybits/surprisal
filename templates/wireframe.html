@@ -3,7 +3,7 @@
     <style>
       @font-face {
         font-family: "Portfolio";
-        src: url("Web437_Portfolio_6x8.woff") format('woff');
+        src: url("portfolio.woff") format('woff');
       }
       body {
         display: flex;
@@ -90,10 +90,10 @@
         padding-right: 2em;
         align-content: center;
       }
-      #keyboard .white-key:hover {
+      #keyboard .white-key:hover, #keyboard .white-key.highlight {
         background: pink;
       }
-      #keyboard .black-key:hover {
+      #keyboard .black-key:hover, #keyboard .black-key.highlight {
         background: purple;
       }
       #keyboard .white-key {
@@ -114,8 +114,87 @@
         color: white;
       }
     </style>
+    <script src="https://unpkg.com/tone"></script>
     <script>
       window.onload = () => {
+        
+        const synth = new Tone.Synth().toDestination();
+        let currentVector = [1,2,3,4,5,6,7,8,9,10];
+        Tone.Transport.start(0);
+
+        
+        const notes = ["A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab"];
+        
+        function fetchFromBackend(text) {
+            const hello = fetch(`/process/?text=${text}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                    },
+                body: JSON.stringify({text: text})
+            })
+                .then(response => response.json())
+                .then(data => {
+                  // document.getElementById("result").innerHTML += JSON.stringify(data) + "<br>";
+                    playMelody(data);
+                });
+        }
+        // fetchFromBackend("Hello back there!");
+
+
+        function playVector(vector) {
+            console.log(vector);
+            const notes = vector.map(d => Tone.Frequency("C3").transpose(Math.round(d)));
+            console.log(notes);
+            var seq = new Tone.Sequence(function(time, note){
+                synth.triggerAttackRelease(note, "8n", time);
+            }, notes, "4n");
+            seq.loop = false;
+            seq.start(0);
+            Tone.start();
+        }
+        
+        function convertSharpToFlat(note) {
+          if (note.indexOf("#") == 1) {
+            return notes[notes.indexOf(note[0])+1] + note[2];
+          }
+          return note;
+        }
+
+        async function playMelody(data) {
+            await Tone.start();
+            let surprisals = data.surprisals;
+            let pitches = data.scale_pitches;
+            let durations = data.lengths;
+            let volumes = data.frequencies_inverted;
+            let notes = pitches.map(d => Tone.Frequency("C3").transpose(Math.round(d)))
+            let delay = Tone.now();
+            let timeouts = []
+            for(let i = 0; i < surprisals.length; i++) {
+                timeouts.push(delay);
+                durations[i] /= 8;
+                let env = new Tone.Envelope({
+                    attack: 0.05,
+                    decay: 0.1,
+                    sustain: 0.1,
+                    release: durations[i],
+                }).toDestination();
+                synth.volume.value = volumes[i] / 2;
+                synth.triggerAttackRelease(notes[i], durations[i], delay);  
+                window.setTimeout(() => {
+                  console.log(notes[i].toNote(), convertSharpToFlat(notes[i].toNote()), "start", Tone.Time(durations[i]).toSeconds() * 1000, Tone.Time(timeouts[i]).toSeconds() * 1000); 
+                  const key = document.getElementById(convertSharpToFlat(notes[i].toNote()));
+                  key.classList.add("highlight");
+                  window.setTimeout(() => {
+                    console.log(key, notes[i].toNote(), "end");
+  
+                    key.classList.remove("highlight");
+                  }, Tone.Time(durations[i]).toSeconds() * 1000);
+                }, Tone.Time(timeouts[i]).toSeconds() * 1000);
+                delay += durations[i];
+            }
+        }   
+        
         const instruments = ["piano", "theramin", "harp", "flute"];
         const scales = ["major", "minor", "pentatonic", "chromatic", "continuous"];
         const models = ["gpt2", "gpt3", "gpt4"];
@@ -145,11 +224,9 @@
           models_container.appendChild(button);
         }
         
-        const notes = ["A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab"];
-        
         let startingNote = "C";
         let startingPitch = notes.indexOf(startingNote);
-        let startingOctave = 2;
+        let startingOctave = 3;
         
         const piano_container = document.getElementById("keyboard");
         let spacing = 0;
@@ -172,13 +249,19 @@
           key.innerHTML = key.id;
           piano_container.appendChild(key);
         }
+        
+        const submitButton = document.getElementById("submit");
+        submitButton.onclick = (e) => {
+          const text = document.getElementById("user-input").value;
+          fetchFromBackend(text);
+        }
       }  
     </script>
   </head>
   <body>
     <div id="calculator">
       <div id="display">
-        <textarea placeholder="Type something"></textarea>
+        <textarea id="user-input" placeholder="Type something"></textarea>
       </div>
       <div id="buttons">
         <div id="scales">
