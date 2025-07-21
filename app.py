@@ -109,18 +109,11 @@ def music2text():
     # From convert_to_scale: pitch = minor_intervals[int(surprisal/2)]
     # So: surprisal = 2 * index where minor_intervals[index] == target_pitch
     # minor_intervals = [0,2,3,5,7,8,10,12,14,15,17,18,19,20,22]
-    scale_intervals = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]
+    # scale_intervals = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]
     
     # Find the index in minor_intervals that matches target_pitch
-    target_surprisal = None
-    for i, pitch in enumerate(scale_intervals):
-        if pitch == target_pitch:
-            target_surprisal = i * 2  # Reverse the division by 2
-            break
-    
-    if target_surprisal is None:
-        return json.dumps({"error": f"Target pitch {target_pitch} not found in minor scale"})
-    
+    target_surprisal = target_pitch * 2
+
     # Find tokens that have surprisal close to the target
     surprisal_diff = torch.abs(surprisals - target_surprisal)
     best_token_indices = torch.topk(surprisal_diff, k=10, largest=False).indices
@@ -131,7 +124,7 @@ def music2text():
     best_surprisal = surprisals[best_token_id].item()
     
     # Calculate what pitch this token would actually produce
-    actual_pitch = scale_intervals[int(best_surprisal/2)]
+    actual_pitch = int(best_surprisal/2)
     
     # Get top 5 candidates for variety
     candidates = []
@@ -139,7 +132,7 @@ def music2text():
         token_id = best_token_indices[i].item()
         token = tokenizer.decode([token_id])
         token_surprisal = surprisals[token_id].item()
-        token_pitch = scale_intervals[int(token_surprisal/2)]
+        token_pitch = int(token_surprisal/2)
         candidates.append({
             "token": token,
             "surprisal": token_surprisal,

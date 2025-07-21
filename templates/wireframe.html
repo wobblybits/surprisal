@@ -191,6 +191,14 @@
         color: black;
         mix-blend-mode: multiply;
       }
+      #keyboard .disabled {
+        cursor: default;
+        pointer-events: none;
+        opacity: 0.25;
+        /* border: 1px solid black;
+        background: transparent;
+        color: transparent; */
+      }
     </style>
     <script src="https://unpkg.com/tone"></script>
     <script>
@@ -285,52 +293,58 @@
         };
 
         const scaleIntervals = {
-          "major": [0, 2, 4,5,7,9,11,12,14,16,17],
-          "minor": [0,2,3,5,7,8,10,12,14,15,17,18,19,20,22],
-          "pentatonic": [0,1,2,4,5,7,8,9,11,12],
-          "chromatic": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+          "major hept": [0,2,4,5,7,9,11,12,14,16,17,19,21,23],
+          "minor hept": [0,2,3,5,7,8,10,12,14,15,17,19,20,22],
+          "major pent": [0,2,4,7,9,12,14,16,19,21],
+          "minor pent": [0,3,5,8,10,12,15,17,20,22],
+          "chromatic": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
           "continuous": []
         };
 
-        let currentScale = "major";
+        let currentScale = "major hept";
 
         const instruments = Object.keys(presets);
+        const scales = Object.keys(scaleIntervals);
 
         const notes = ["A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab"];
         
         function fetchFromBackend(text) {
-            const hello = fetch(`/process/?text=${text}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                    },
-                body: JSON.stringify({text: text})
-            })
-                .then(response => response.json())
-                .then(data => {
-                  // document.getElementById("result").innerHTML += JSON.stringify(data) + "<br>";
-                    playMelody(data);
-                });
+          fetch(`/process/?text=${text}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({text: text})
+          })
+          .then(response => response.json())
+          .then(data => {
+            playMelody(data);
+          });
         }
-        // fetchFromBackend("Hello back there!");
 
         function fetchFromBackendReverse(text, scale_pitch) {
-            const hello = fetch(`/reverse/?note=${scale_pitch}&text=${text}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                    },
-                body: JSON.stringify({text: text, note: scale_pitch})
+          try {
+            const interval = scaleIntervals[currentScale].indexOf(scale_pitch);
+            fetch(`/reverse/?note=${interval}&text=${text}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({text: text, note: interval})
             })
-                .then(response => response.json())
-                .then(data => {
-                  // document.getElementById("result").innerHTML += JSON.stringify(data) + "<br>";
-                    console.log(data);
-                    const userInput = document.getElementById('user-input');
-                    userInput.value = data.input_text + data.best_token;
-                    userInput.setSelectionRange(data.input_text.length, data.input_text.length + data.best_token.length);
-                    userInput.focus();
-                });
+            .then(response => response.json())
+            .then(data => {
+              console.log(data);
+              const userInput = document.getElementById('user-input');
+              userInput.value = data.input_text + data.best_token;
+              userInput.setSelectionRange(data.input_text.length, data.input_text.length + data.best_token.length);
+              userInput.focus();
+              userInput.blur();
+            });
+          }
+          catch (e) {
+            console.log(e);
+          }
         }
 
         function playVector(vector) {
@@ -361,7 +375,6 @@
           for(let i = 0; i < surprisals.length; i++) {
             converted_pitches.push(scaleIntervals[currentScale][Math.round(surprisals[i]/2)]);
           }
-          console.log(converted_pitches);
           return converted_pitches
         }
 
@@ -432,7 +445,6 @@
             }
         }   
         
-        const scales = ["major", "minor", "pentatonic", "chromatic", "continuous"];
         const models = ["gpt2", "gpt3", "gpt4"];
         
         const instrument_container = document.getElementById("instruments");
@@ -460,6 +472,14 @@
             const intervals = scaleIntervals[selectedScale];
             console.log(selectedScale, intervals, button, e.target);
             currentScale = selectedScale;
+            document.querySelectorAll("#keyboard div").forEach((key, i) => {
+              if (scaleIntervals[selectedScale].includes(i)) {
+                key.classList.remove("disabled");
+              }
+              else {
+                key.classList.add("disabled");
+              }
+            });
           }
           scales_container.appendChild(button);
         }
@@ -496,10 +516,21 @@
             spacing++;
           }
           key.innerHTML = convertFlatToSymbol(key.id);
+          if (scaleIntervals[currentScale].includes(i)) {
+              key.classList.remove("disabled");
+            }
+            else {
+              key.classList.add("disabled");
+            }
           key.onclick = (e) => {
             synth.triggerAttackRelease(key.id, "8n", Tone.now());
             const text = document.getElementById("user-input").value;
-            fetchFromBackendReverse(text, scale_pitch);
+            try {
+              fetchFromBackendReverse(text, scale_pitch);
+            }
+            catch (e) {
+              console.log(e);
+            }
           }
           piano_container.appendChild(key);
         }
@@ -507,9 +538,69 @@
         const submitButton = document.getElementById("submit");
         submitButton.onclick = (e) => {
           const text = document.getElementById("user-input").value;
-          fetchFromBackend(text);
+          try {
+            fetchFromBackend(text);
+          }
+          catch (e) {
+            console.log(e);
+          }
         }
-      }  
+
+        var lastKeyPress = {
+          key: null,
+          time: null,
+          note: null,
+        }
+        window.onkeydown = (e) => {
+          if (document.activeElement.id === "user-input") {
+            return;
+          }
+          if (lastKeyPress.key != e.key && parseInt(e.key) > 0 && parseInt(e.key) < 10) {
+            if (lastKeyPress.key !== null) {
+              const timeDiff = Math.round((performance.now() - lastKeyPress.time) / 62.5);
+              console.log("keyup", lastKeyPress.key, parseInt(lastKeyPress.key), timeDiff, lastKeyPress.note);
+              const text = document.getElementById("user-input").value;
+              try {
+                fetchFromBackendReverse(text, scaleIntervals[currentScale].indexOf(parseInt(lastKeyPress.key) - 1));
+                const key = document.getElementById(convertSharpToFlat(lastKeyPress.note.toNote()));
+                key.classList.remove("highlight");
+              }
+              catch (e) {
+                console.log(e);
+              }
+            }
+            lastKeyPress.key = e.key;
+            lastKeyPress.time = performance.now();
+            const pitch = convertToScale([(parseInt(lastKeyPress.key) - 1)*2]);
+            const note = Tone.Frequency("C3").transpose(pitch);
+            lastKeyPress.note = note;
+            synth.triggerAttackRelease(note, "8n", Tone.now());
+            const key = document.getElementById(convertSharpToFlat(lastKeyPress.note.toNote()));
+            key.classList.add("highlight");
+          }
+        }
+        window.onkeyup = (e) => {
+          if (document.activeElement.id === "user-input" || lastKeyPress.key === null) {
+            return;
+          }
+          if (lastKeyPress.key === e.key) {
+            const timeDiff = Math.round((performance.now() - lastKeyPress.time) / 62.5);
+            console.log(timeDiff);
+            const text = document.getElementById("user-input").value;
+            try {
+              console.log("keyup", lastKeyPress.key, parseInt(lastKeyPress.key), timeDiff, lastKeyPress.note);
+              fetchFromBackendReverse(text, scaleIntervals[currentScale].indexOf(parseInt(lastKeyPress.key) - 1));
+              const key = document.getElementById(convertSharpToFlat(lastKeyPress.note.toNote()));
+                key.classList.remove("highlight");
+            }
+            catch (e) {
+              console.log(e);
+            }
+            lastKeyPress.key = null;
+            lastKeyPress.time = null;
+          }
+        }
+      }
     </script>
   </head>
   <body>
