@@ -304,6 +304,24 @@
         }
         // fetchFromBackend("Hello back there!");
 
+        function fetchFromBackendReverse(text, scale_pitch) {
+            const hello = fetch(`/reverse/?note=${scale_pitch}&text=${text}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                    },
+                body: JSON.stringify({text: text, note: scale_pitch})
+            })
+                .then(response => response.json())
+                .then(data => {
+                  // document.getElementById("result").innerHTML += JSON.stringify(data) + "<br>";
+                    console.log(data);
+                    const userInput = document.getElementById('user-input');
+                    userInput.value = data.input_text + data.best_token;
+                    userInput.setSelectionRange(data.input_text.length, data.input_text.length + data.best_token.length);
+                    userInput.focus();
+                });
+        }
 
         function playVector(vector) {
             console.log(vector);
@@ -422,6 +440,7 @@
           const key = document.createElement("div");
           const note = notes[(i+startingPitch) % notes.length];
           key.id = note + (startingOctave + Math.floor(i/12));
+          const scale_pitch = i;
           if (note.length > 1) {
             key.style.bottom = (100*(spacing-.5)/(numOctaves * 7 + numKeysPastOctave)) + "%";
             key.classList.add("black-key");
@@ -434,6 +453,8 @@
           key.innerHTML = convertFlatToSymbol(key.id);
           key.onclick = (e) => {
             synth.triggerAttackRelease(key.id, "8n", Tone.now());
+            const text = document.getElementById("user-input").value;
+            fetchFromBackendReverse(text, scale_pitch);
           }
           piano_container.appendChild(key);
         }
