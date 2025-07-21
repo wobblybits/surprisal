@@ -53,9 +53,14 @@
         line-height: 24px;
         border: 2px darkgray inset;
         border-radius: 6px;
+        color: #333;
       }
       #display textarea:focus {
         outline: none;
+      }
+      #display textarea::selection {
+        background: #333;
+        color: #aacc99;
       }
       #buttons {
         display: flex;
@@ -332,9 +337,17 @@
             let notes = pitches.map(d => Tone.Frequency("C3").transpose(Math.round(d)))
             let delay = Tone.now();
             let offset = delay;
-            let timeouts = []
+            let timeouts = [];
+
+            const userInput = document.getElementById('user-input');
+            let startIndex = 0;
+            let endIndex = 0;
+
             for(let i = 0; i < surprisals.length; i++) {
                 timeouts.push(delay);
+                endIndex = startIndex + durations[i];
+                const s = startIndex;
+                const e = endIndex;
                 durations[i] /= 8;
                 let env = new Tone.Envelope({
                     attack: 0.05,
@@ -345,16 +358,20 @@
                 synth.volume.value = volumes[i] / 2;
                 synth.triggerAttackRelease(notes[i], durations[i], delay);  
                 window.setTimeout(() => {
-                  console.log(notes[i].toNote(), convertSharpToFlat(notes[i].toNote()), "start", Tone.Time(durations[i]).toSeconds() * 1000, Tone.Time(timeouts[i]).toSeconds() * 1000); 
+                  // console.log(notes[i].toNote(), convertSharpToFlat(notes[i].toNote()), "start", Tone.Time(durations[i]).toSeconds() * 1000, Tone.Time(timeouts[i]).toSeconds() * 1000); 
                   const key = document.getElementById(convertSharpToFlat(notes[i].toNote()));
                   key.classList.add("highlight");
+                  userInput.setSelectionRange(s, e);
+                  userInput.focus();
                   window.setTimeout(() => {
-                    console.log(key, notes[i].toNote(), "end");
-  
+                    // console.log(key, notes[i].toNote(), "end");
+                    userInput.blur();
+                    userInput.setSelectionRange(0, 0);
                     key.classList.remove("highlight");
-                  }, Tone.Time(durations[i]).toSeconds() * 1000);
+                  }, Tone.Time(durations[i]).toSeconds() * 900);
                 }, (Tone.Time(timeouts[i]).toSeconds() - offset) * 1000);
                 delay += durations[i];
+                startIndex = endIndex;
             }
         }   
         
