@@ -22,13 +22,13 @@
         display: flex;
         border: 2px solid black;
         flex-direction: column;
-        flex-wrap: wrap;
-        width: calc(50% - 2em);
+        flex-wrap: nowrap;
+        width: calc(50% - 2em); 
         background: gray;
         height: 100%;
         border-radius: 3px;
         margin-left: 1.5em;
-        overflow: hidden;
+        overflow: auto;
       }
       #title {
         display: block;
@@ -284,6 +284,16 @@
           }
         };
 
+        const scaleIntervals = {
+          "major": [0, 2, 4,5,7,9,11,12,14,16,17],
+          "minor": [0,2,3,5,7,8,10,12,14,15,17,18,19,20,22],
+          "pentatonic": [0,1,2,4,5,7,8,9,11,12],
+          "chromatic": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+          "continuous": []
+        };
+
+        let currentScale = "major";
+
         const instruments = Object.keys(presets);
 
         const notes = ["A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab"];
@@ -346,16 +356,45 @@
           return note.replace("b", "&flat;");
         }
 
+        function convertToScale(surprisals) {
+          let converted_pitches = [];
+          for(let i = 0; i < surprisals.length; i++) {
+            converted_pitches.push(scaleIntervals[currentScale][Math.round(surprisals[i]/2)]);
+          }
+          console.log(converted_pitches);
+          return converted_pitches
+        }
+
+        function convertToContinuous(surprisals) {
+          let converted_pitches = [];
+          for (let i = 0; i < surprisals.length; i++) {
+            converted_pitches.push((surprisals[i] * 50).toString());
+          }
+          // set first note to c3 since 0hz isn't audible
+          converted_pitches[0] = 130; 
+          console.log(converted_pitches);
+          return converted_pitches;
+        }
+        
         async function playMelody(data) {
             await Tone.start();
             let surprisals = data.surprisals;
-            let pitches = data.scale_pitches;
+            let pitches = [];
+            let notes = [];
+            if (currentScale === "continuous") {
+              pitches = convertToContinuous(surprisals);
+              notes = pitches;
+              }
+            else {
+              pitches = convertToScale(surprisals);
+              notes = pitches.map(d => Tone.Frequency("C3").transpose(d));
+            }
             let durations = data.lengths;
             let volumes = data.frequencies_inverted;
-            let notes = pitches.map(d => Tone.Frequency("C3").transpose(Math.round(d)))
             let delay = Tone.now();
             let offset = delay;
             let timeouts = [];
+            //let notes = pitches.map(d => Tone.Frequency("C3").transpose(d))
 
             const userInput = document.getElementById('user-input');
             let startIndex = 0;
@@ -416,6 +455,12 @@
           const button = document.createElement("div");
           button.id = scales[i];
           button.innerHTML = scales[i];
+          button.onclick = (e) => {
+            const selectedScale = button.id;
+            const intervals = scaleIntervals[selectedScale];
+            console.log(selectedScale, intervals, button, e.target);
+            currentScale = selectedScale;
+          }
           scales_container.appendChild(button);
         }
         
