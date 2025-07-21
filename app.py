@@ -1,4 +1,6 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, send_file, make_response
+import os
+from werkzeug.utils import secure_filename
 import json
 import wordfreq
 import torch
@@ -58,17 +60,17 @@ def backend():
 def frontend():
     return render_template('wireframe.html')
 
-# @app.route('assets/<string:filename>', methods=['GET'])
-# def assets(filename):
-#     rtry:
-#         filename = secure_filename(filename)  # Sanitize the filename
-#         file_path = os.path.join('assets', filename)
-#         if os.path.isfile(file_path):
-#             return send_file(file_path, as_attachment=True)
-#         else:
-#             return make_response(f"File '{filename}' not found.", 404)
-#     except Exception as e:
-#         return make_response(f"Error: {str(e)}", 500
+@app.route('/assets/<string:filename>', methods=['GET'])
+def assets(filename):
+    try:
+        filename = secure_filename(filename)  # Sanitize the filename
+        file_path = os.path.join('assets', filename)
+        if os.path.isfile(file_path):
+            return send_file(file_path, as_attachment=True)
+        else:
+            return make_response(f"File '{filename}' not found.", 404)
+    except Exception as e:
+        return make_response(f"Error: {str(e)}", 500)
 
 @app.route('/test/')
 def test():
