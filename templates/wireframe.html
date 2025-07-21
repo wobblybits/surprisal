@@ -1,5 +1,9 @@
 <html>
   <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Coiny&family=Fredoka:wght@300..700&family=Major+Mono+Display&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Offside&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+    <title>Surprisal Calculator</title>
     <style>
       @font-face {
         font-family: "Portfolio";
@@ -9,30 +13,46 @@
         display: flex;
         flex-direction: row;
         width: 100%;
+        font-family: "Fredoka", sans-serif;
+        background: darkslategray;
+        padding: 2em 0;
+        text-align: center;
       }
       #calculator {
         display: flex;
-        border-right: 1px solid black;
+        border: 2px solid black;
         flex-direction: column;
         flex-wrap: wrap;
-        width: 50%;
+        width: calc(50% - 2em);
         background: gray;
         height: 100%;
+        border-radius: 3px;
+        margin-left: 1.5em;
+        overflow: hidden;
+      }
+      #title {
+        display: block;
+        flex-shrink: 2;
+        padding: 1.5em 2em 0;
+        text-align: right;
+        width: calc(100% - 4em);
+        font-style: italic;
       }
       #display {
-        padding: 2em 2em 0;
-        height: 34%;
+        padding: 1em 2em 0;
+        height: 33%;
       }
       #display textarea {
         background: #aacc99;
         font-family: "Portfolio", Monospace;
-        width: 100%;
+        width: calc(100%);
         height: 100%;
         padding: 1em;
         outline: none;
         font-size: 16px;
         line-height: 24px;
         border: 2px darkgray inset;
+        border-radius: 6px;
       }
       #display textarea:focus {
         outline: none;
@@ -43,28 +63,62 @@
         flex-wrap: wrap;
         gap: 10px;
         flex-grow: 2;
-        padding: 2em;
+        margin: 1em 0 0 2em;
+        text-transform: uppercase;
+        font-weight: 400;
+        text-shadow: 0 0 2px rgba(255,255,255,0.2);
+        color:#333;
+        width: calc(100% - 4em);
       }
       #buttons > div {
         display: flex;
         flex-direction: column;
         flex-wrap: wrap;
-        flex-grow: 2;
-        border: 1px solid white;
-        background: plum;
+        flex-grow: 1;
+        /* border: 1px solid white; */
+        /* background: plum; */
         padding: 4px;
+        text-align: center;
+        flex-shrink: 2;
       }
       #buttons > div > div {
         display: flex;
         flex-grow: 2;
         flex-direction: column;
         flex-wrap: wrap;
-        width: 48px;
-        height: 48px;
+        /* min-width: 48px; */
+        min-height: 48px;
         border: 2px outset gray;
         background: pink;
         margin: 2px;
         width: calc(100% - 8px);
+        align-content: center;
+        align-items: center;
+        justify-content: center;
+        justify-items: center;
+        border-radius: 6px;
+      }
+      #buttons > div > div > img {
+        max-width: 36px;
+        max-height: 36px;
+        align-self: center;
+        margin: auto;
+      }
+      #buttons > div#instruments {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 2px;
+        max-width: 120px;
+        max-height: 180px;
+        text-align: center;
+        align-content: center;
+        align-items: center;
+        justify-content: center;
+        justify-items: center;
+      }
+      #buttons > div#instruments > div {
+        max-width: 48px;
+        flex-grow: 0;
       }
       #buttons #translate {
         width: 100%
@@ -72,17 +126,25 @@
       #buttons > div > div:hover {
         background: purple;
         border: 2px inset gray;
+        color: white;
+        cursor: pointer;
+      }
+      #buttons > div > div:hover img {
+        filter: invert(1);
       }
       #buttons > div > div#submit {
         background: orange;
+        margin-bottom: 1em;
       }
       #buttons > div > div#submit:hover {
         background: red;
       }
       #keyboard {
-        border-left: 2px solid black;
-        width: 50%;
+        border-left: 10px solid darkslategrey;
+        width: calc(50% - 2em);
         position: relative;
+        background: linear-gradient(to right, black 0px, black 2px, transparent 2px, transparent 100%);
+        background-repeat: no-repeat;
       }
       #keyboard > div {
         position: absolute;
@@ -90,19 +152,28 @@
         text-align: right;
         padding-right: 2em;
         align-content: center;
+        border-top-right-radius: 6px;
+        border-bottom-right-radius: 6px;
+        border-left: 1px solid black;
+        cursor: pointer;
       }
       #keyboard .white-key:hover, #keyboard .white-key.highlight {
         background: pink;
+        color: black;
       }
       #keyboard .black-key:hover, #keyboard .black-key.highlight {
         background: purple;
+        color: white;
+        mix-blend-mode: normal;
+        border: 1px solid black;
       }
       #keyboard .white-key {
         background: white;
         border: 2px solid black;
-        border-left: none;
+        border-left: 2px solid black;
         height: 6.5%;
-        width: calc(100% - 2em); /* subtract padding*/
+        width: calc(100% - 3em); /* subtract padding*/
+        color: white;
       }
       #keyboard .black-key {
         background: black;
@@ -110,9 +181,10 @@
         height: 6%;
         z-index: 99;
         border: 2px solid white;
-        border-left: none;
-        left: 0px;
-        color: white;
+        border-left: 1px solid transparent;
+        left: 1px;
+        color: black;
+        mix-blend-mode: multiply;
       }
     </style>
     <script src="https://unpkg.com/tone"></script>
@@ -123,7 +195,92 @@
         let currentVector = [1,2,3,4,5,6,7,8,9,10];
         Tone.Transport.start(0);
 
-        
+        const presets = {
+          "xylophone": {
+            "portamento" : 0.0,
+            "oscillator": {
+                "type": "sine",
+                "partials": [1,0,2,0,3]   
+            },
+            "envelope": {
+                "attack": 0.001,
+                "decay": 1.2,
+                "sustain": 0,
+                "release": 1.2
+            }
+          },
+          flute: {
+            "portamento" : 0.0,
+            "oscillator": {
+                "type": "square4",
+                "partials": [1,1,1,1,1]
+            },
+            "envelope": {
+                "attack": 2,
+                "decay": 1,
+                "sustain": 0.2,
+                "release": 2
+            }
+          },
+          violin: {
+            "portamento" : 0.0,
+            "harmonicity": 3.01,
+            "modulationIndex": 14,
+            "oscillator": {
+                "type": "triangle",
+                "partials": [1,1,1,1,1]
+            },
+            "envelope": {
+                "attack": 0.2,
+                "decay": 0.3,
+                "sustain": 0.1,
+                "release": 1.2
+            },
+            "modulation" : {
+                "type": "square"
+            },
+            "modulationEnvelope" : {
+                "attack": 0.01,
+                "decay": 0.5,
+                "sustain": 0.2,
+                "release": 0.1
+            }
+          },
+          theramin: {
+            "portamento" : 0.1,
+            "oscillator": {
+                "type": "sine",
+                "partials": [1,0,0,0,0]
+            },
+            "envelope": {
+                "attack": 0.001,
+                "decay": 1.2,
+                "sustain": 1.0,
+                "release": 1.2
+            }
+          },
+          piano: {
+            "portamento" : 0.0,
+            "oscillator": {
+                "type": "sine",
+                "partials": [1,1,1,1,1]
+            },
+            "envelope": {
+                "attack": 0.001,
+                "decay": 1.2,
+            }
+          },
+          choir: {
+            "portamento" : 0.0,
+            "oscillator": {
+                "type": "sine",
+                "partials": [1,1,1,1,1]
+            },
+          }
+        };
+
+        const instruments = Object.keys(presets);
+
         const notes = ["A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab"];
         
         function fetchFromBackend(text) {
@@ -161,6 +318,10 @@
           }
           return note;
         }
+        
+        function convertFlatToSymbol(note) {
+          return note.replace("b", "&flat;");
+        }
 
         async function playMelody(data) {
             await Tone.start();
@@ -197,7 +358,6 @@
             }
         }   
         
-        const instruments = ["piano", "theramin", "harp", "flute"];
         const scales = ["major", "minor", "pentatonic", "chromatic", "continuous"];
         const models = ["gpt2", "gpt3", "gpt4"];
         
@@ -206,7 +366,13 @@
         for (i in instruments) {
           const button = document.createElement("div");
           button.id = instruments[i];
-          button.innerHTML = instruments[i];
+          button.innerHTML = "<img src='assets/" + instruments[i] + ".png' />";
+          button.onclick = (e) => {
+            const instrument = button.id;
+            const preset = presets[instrument];
+            console.log(instruments, presets, instrument, preset, button, e.target);
+            synth.set(preset);
+          }
           instrument_container.appendChild(button);
         }
         
@@ -248,7 +414,10 @@
             key.classList.add("white-key");
             spacing++;
           }
-          key.innerHTML = key.id;
+          key.innerHTML = convertFlatToSymbol(key.id);
+          key.onclick = (e) => {
+            synth.triggerAttackRelease(key.id, "8n", Tone.now());
+          }
           piano_container.appendChild(key);
         }
         
@@ -262,6 +431,7 @@
   </head>
   <body>
     <div id="calculator">
+      <div id="title">Surprisal Calculator</div>
       <div id="display">
         <textarea id="user-input" placeholder="Type something"></textarea>
       </div>
