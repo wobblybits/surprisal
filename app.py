@@ -22,31 +22,31 @@ models = {
     #     "tokenizer": AutoTokenizer.from_pretrained("perplexity-ai/r1-1776"),
     #     "model": AutoModelForCausalLM.from_pretrained("perplexity-ai/r1-1776")
     # },
-    "smolLM-135M": {
+    "smollm": {
         "tokenizer": AutoTokenizer.from_pretrained("HuggingFaceTB/SmolLM-135M"),
         "model": AutoModelForCausalLM.from_pretrained("HuggingFaceTB/SmolLM-135M"),
         "type": "causal",
         "whitespace": 'Ġ'
     },
-    "nano-mistral": {
+    "nano mistral": {
         "tokenizer": AutoTokenizer.from_pretrained("crumb/nano-mistral"),
         "model": AutoModelForCausalLM.from_pretrained("crumb/nano-mistral"),
         "type": "causal",
         "whitespace": ' '  # Regular space
     },
-    "smol_llama-101M": {
+    "smol llama": {
         "tokenizer": AutoTokenizer.from_pretrained("BEE-spoke-data/smol_llama-101M-GQA"),
         "model": AutoModelForCausalLM.from_pretrained("BEE-spoke-data/smol_llama-101M-GQA"),
         "type": "causal",
         "whitespace": ' '  # Regular space
     }, 
-    "qwen-2.5-0.5b": {
+    "qwen": {
         "tokenizer": AutoTokenizer.from_pretrained("KingNish/Qwen2.5-0.5b-Test-ft"),
         "model": AutoModelForCausalLM.from_pretrained("KingNish/Qwen2.5-0.5b-Test-ft"),
         "type": "causal",
         "whitespace": 'Ġ'
     },
-    "flan-t5-small": {
+    "flan": {
         "tokenizer": AutoTokenizer.from_pretrained("google/flan-t5-small"),
         "model": AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-small"),
         "type": "seq2seq",
