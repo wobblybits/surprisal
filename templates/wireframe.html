@@ -52,20 +52,60 @@
       #display {
         padding: 1em 2em 0;
         height: 36%;
+        display: flex;
+        flex-direction: column;
       }
-      #display textarea {
+      #display #user-input {
         background: #aacc99;
         font-family: "Portfolio", Monospace;
         width: calc(100%);
-        padding: 1em;
+        padding: 2em 1em 1em;
         outline: none;
         font-size: 16px;
         line-height: 24px;
         border: 2px darkgray inset;
+        border-top: none;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
         border-radius: 6px;
         color: #333;
-        min-height: 100%;
-        height: 100%;
+        text-shadow: 1px 1px 0 rgba(0,0,0,.2); 
+        min-height: 85%;
+        height: 85%;
+        margin-top: -4px;
+      }
+      #display #indicator {
+        background: #aacc99;
+        text-align: center;
+        vertical-align: middle;
+        font-family: "Portfolio", Monospace;
+        width: calc(100% - 2em - 4px);
+        padding: 0 1em;
+        outline: none;
+        /* font-size: 10px; */
+        /* line-height: 3%; */
+        border: 2px darkgray inset;
+        border-bottom: none;
+        border-radius: 6px;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        color: #333;
+        min-height: 3%;
+        height: 3%;
+        z-index: 9999999;
+      }
+      #display #indicator span {
+        display: inline-block;
+        padding: .5em 0 0;
+        font-size: 0.80em;
+        width: 100px;
+        margin: 0px 8px;
+        border-bottom: 2px solid rgba(0,0,0,.2);
+        color: #333;
+        text-shadow: 1px 1px 0 rgba(0,0,0,.2); 
+        /* background: linear-gradient(to right, rgba(0,0,0,.05) 0px, rgba(0,0,0,.05) 1px, transparent 1px); */
+        background-size: 4px;
+        background-repeat: repeat;
       }
       #display textarea:focus {
         outline: none;
@@ -240,6 +280,10 @@
         const synth = new Tone.Synth().toDestination();
         let currentVector = [1,2,3,4,5,6,7,8,9,10];
         Tone.Transport.start(0);
+        
+        let currentSettings = ["PIANO", "MAJ HEPT", "GPT2"];
+        const indicator = document.getElementById('indicator');
+        indicator.innerHTML = "<span>" + currentSettings.join('</span><span>') + "</span>";
 
         const presets = {
           "xylophone": {
@@ -457,13 +501,7 @@
                 const s = startIndex;
                 const e = endIndex;
                 durations[i] /= 8;
-                let env = new Tone.Envelope({
-                    attack: 0.05,
-                    decay: 0.1,
-                    sustain: 0.1,
-                    release: durations[i],
-                }).toDestination();
-                synth.volume.value = volumes[i] / 2;
+                // synth.volume.value = volumes[i] / 2;
                 synth.triggerAttackRelease(notes[i], durations[i], delay);  
                 window.setTimeout(() => {
                   // console.log(notes[i].toNote(), convertSharpToFlat(notes[i].toNote()), "start", Tone.Time(durations[i]).toSeconds() * 1000, Tone.Time(timeouts[i]).toSeconds() * 1000); 
@@ -496,6 +534,9 @@
             const preset = presets[instrument];
             console.log(instruments, presets, instrument, preset, button, e.target);
             synth.set(preset);
+            currentSettings[0] = instrument.toUpperCase();
+            const indicator = document.getElementById('indicator');
+            indicator.innerHTML = "<span>" + currentSettings.join('</span><span>') + "</span>";
           }
           instrument_container.appendChild(button);
         }
@@ -510,6 +551,9 @@
             const intervals = scaleIntervals[selectedScale];
             console.log(selectedScale, intervals, button, e.target);
             currentScale = selectedScale;
+            currentSettings[1] = selectedScale.toUpperCase();
+            const indicator = document.getElementById('indicator');
+            indicator.innerHTML = "<span>" + currentSettings.join('</span><span>') + "</span>";
             document.querySelectorAll("#keyboard div").forEach((key, i) => {
               if (scaleIntervals[selectedScale].includes(i)) {
                 key.classList.remove("disabled");
@@ -530,6 +574,9 @@
           button.onclick = (e) => {
             const selectedModel = button.id;
             console.log(selectedModel, button, e.target);
+            currentSettings[2] = selectedModel.toUpperCase();
+            const indicator = document.getElementById('indicator');
+            indicator.innerHTML = "<span>" + currentSettings.join('</span><span>') + "</span>";
             fetch(`/model/${selectedModel}`, {
               method: 'GET',
               headers: {
@@ -659,6 +706,7 @@
       <div id="calculator">
         <div id="title">Surprisal Calculator</div>
         <div id="display">
+          <div id="indicator">stuff</div> 
           <textarea id="user-input" placeholder="Type something"></textarea>
         </div>
         <div id="buttons">

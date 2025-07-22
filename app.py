@@ -34,12 +34,12 @@ models = {
         "type": "causal",
         "whitespace": ' '  # Regular space
     },
-    "smol llama": {
-        "tokenizer": AutoTokenizer.from_pretrained("BEE-spoke-data/smol_llama-101M-GQA"),
-        "model": AutoModelForCausalLM.from_pretrained("BEE-spoke-data/smol_llama-101M-GQA"),
-        "type": "causal",
-        "whitespace": ' '  # Regular space
-    }, 
+    # "smol llama": {
+    #     "tokenizer": AutoTokenizer.from_pretrained("BEE-spoke-data/smol_llama-101M-GQA"),
+    #     "model": AutoModelForCausalLM.from_pretrained("BEE-spoke-data/smol_llama-101M-GQA"),
+    #     "type": "causal",
+    #     "whitespace": ' '  # Regular space
+    # }, 
     "qwen": {
         "tokenizer": AutoTokenizer.from_pretrained("KingNish/Qwen2.5-0.5b-Test-ft"),
         "model": AutoModelForCausalLM.from_pretrained("KingNish/Qwen2.5-0.5b-Test-ft"),
@@ -140,7 +140,6 @@ def backend():
     surprisals = -token_log_probs[0] / math.log(2)
     surprisals = [0] + surprisals.tolist() # padding since first token has no surprisal info
 
-    converted_pitches = convert_to_scale(surprisals)
     tokens = tokenizer.convert_ids_to_tokens(input_ids[0])[:]
     tokens = process_tokens_for_display(tokens, models[current_model]["whitespace"])
     
@@ -150,7 +149,6 @@ def backend():
     # setting minimum frequency value at 0.5 to avoid silent notes
     frequencies_inverted = [max((8 - i), 0.5) for i in frequencies]
     return json.dumps({"surprisals": surprisals,
-                    "scale_pitches": converted_pitches,
                     "tokens": tokens,
                     "lengths": lengths,
                     "frequencies": frequencies,
@@ -276,18 +274,6 @@ def music2text():
         "candidates": candidates
     })
 
-def convert_to_scale(surprisals_list):
-    # rounds surprisal values and converts them to intervals of a scale
-    converted_pitches = []
-    scale = "minor"
-    # major_intervals = [0, 2, 4,5,7,9,11,12,14,16,17]
-    # minor_intervals = [0,2,3,5,7,8,10,12,14,15,17,18,19,20,22]
-    if scale == "minor":
-        for i in range(len(surprisals_list)):
-            # arbitrarily squished surprisal values in half to make it sound better
-            converted_pitches.append(int(i/2))
-
-    return converted_pitches
 
 @app.route('/debug_tokens/<string:model_name>', methods=['GET'])
 def debug_tokens(model_name):
