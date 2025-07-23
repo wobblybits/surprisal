@@ -278,10 +278,11 @@
       window.onload = () => {
         
         const synth = new Tone.Synth().toDestination();
+        
         let currentVector = [1,2,3,4,5,6,7,8,9,10];
         Tone.Transport.start(0);
         
-        let currentSettings = ["PIANO", "MAJ HEPT", "GPT2"];
+        let currentSettings = ["THEREMIN", "MAJ HEPT", "GPT2"];
         const indicator = document.getElementById('indicator');
         indicator.innerHTML = "<span>" + currentSettings.join('</span><span>') + "</span>";
 
@@ -336,28 +337,30 @@
                 "release": 0.1
             }
           },
-          theramin: {
-            "portamento" : 0.1,
+          theremin: {
+            "portamento" : 0.07,
             "oscillator": {
                 "type": "sine",
-                "partials": [1,0,0,0,0]
+                "partials": [1,0.1]
             },
             "envelope": {
-                "attack": 0.001,
+                "attack": 0.1,
                 "decay": 1.2,
-                "sustain": 1.0,
-                "release": 1.2
+                "sustain": 1,
+                "release": 1
             }
           },
           piano: {
             "portamento" : 0.0,
             "oscillator": {
-                "type": "sine",
-                "partials": [1,1,1,1,1]
+                "type": "triangle",
+                "partials": [1,0.5, 0.3, 0.2,0.1]
             },
             "envelope": {
                 "attack": 0.001,
                 "decay": 1.2,
+                "sustain": 0,
+                "release": 1.2
             }
           },
           choir: {
@@ -377,6 +380,8 @@
           "chromatic": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
           "continuous": []
         };
+
+        synth.set(presets["theremin"]);
 
         let currentScale = Object.keys(scaleIntervals)[0];
 
@@ -455,7 +460,14 @@
         function convertToScale(surprisals) {
           let converted_pitches = [];
           for(let i = 0; i < surprisals.length; i++) {
-            converted_pitches.push(scaleIntervals[currentScale][Math.round(surprisals[i]/2)]);
+            let interval = Math.round(surprisals[i]/2);
+            let scaleLength = scaleIntervals[currentScale].length;
+            if (interval > scaleLength - 1) {
+              converted_pitches.push(scaleIntervals[currentScale][scaleLength - 1])
+            }
+            else {
+              converted_pitches.push(scaleIntervals[currentScale][interval]);
+            }
           }
           return converted_pitches
         }
@@ -502,6 +514,7 @@
                 const e = endIndex;
                 durations[i] /= 8;
                 // synth.volume.value = volumes[i] / 2;
+                
                 synth.triggerAttackRelease(notes[i], durations[i], delay);  
                 window.setTimeout(() => {
                   // console.log(notes[i].toNote(), convertSharpToFlat(notes[i].toNote()), "start", Tone.Time(durations[i]).toSeconds() * 1000, Tone.Time(timeouts[i]).toSeconds() * 1000); 
@@ -524,7 +537,8 @@
         const models = ["gpt2", "smollm", "nano mistral", "smol llama", "qwen", "flan"];
         
         const instrument_container = document.getElementById("instruments");
-        
+
+
         for (i in instruments) {
           const button = document.createElement("div");
           button.id = instruments[i];
