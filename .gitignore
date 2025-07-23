@@ -3,3 +3,6 @@ node_modules
 package-lock.json
 package.json
 elises_scratchpad2.py
+__pycache__/*
+__pycache__/app.cpython-312.pyc
+.gitignore
