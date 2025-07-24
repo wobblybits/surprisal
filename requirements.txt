@@ -3,3 +3,4 @@ gunicorn
 NLTK
 numpy
 surprisal[transformers]
+wordfreq
