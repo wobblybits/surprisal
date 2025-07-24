@@ -34,12 +34,12 @@ models = {
         "type": "causal",
         "whitespace": ' '  # Regular space
     },
-    # "smol llama": {
-    #     "tokenizer": AutoTokenizer.from_pretrained("BEE-spoke-data/smol_llama-101M-GQA"),
-    #     "model": AutoModelForCausalLM.from_pretrained("BEE-spoke-data/smol_llama-101M-GQA"),
-    #     "type": "causal",
-    #     "whitespace": ' '  # Regular space
-    # }, 
+    "smol llama": {
+        "tokenizer": AutoTokenizer.from_pretrained("BEE-spoke-data/smol_llama-101M-GQA"),
+        "model": AutoModelForCausalLM.from_pretrained("BEE-spoke-data/smol_llama-101M-GQA"),
+        "type": "causal",
+        "whitespace": ' '  # Regular space
+    }, 
     "qwen": {
         "tokenizer": AutoTokenizer.from_pretrained("KingNish/Qwen2.5-0.5b-Test-ft"),
         "model": AutoModelForCausalLM.from_pretrained("KingNish/Qwen2.5-0.5b-Test-ft"),
@@ -109,7 +109,7 @@ def backend():
     else:
         text = request.form.get('text', "No text provided")
 
-    inputs = tokenizer(text, return_tensors="pt")
+    inputs = tokenizer(text, return_tensors="pt", add_special_tokens=False)
     input_ids = inputs["input_ids"]
     
     # Handle different model types
@@ -120,7 +120,7 @@ def backend():
         
         with torch.no_grad():
             # For T5, we'll use a simpler approach without past_key_values
-            outputs = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids, labels=decoder_input_ids, use_cache=False)
+            outputs = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids, labels=decoder_input_ids, use_cache=False, return_dict=True)
         logits = outputs.logits
         shift_logits = logits[:, :-1, :]
         shift_labels = decoder_input_ids[:, 1:]
@@ -129,7 +129,7 @@ def backend():
         labels = input_ids.clone()
         
         with torch.no_grad():
-            outputs = model(input_ids=input_ids, labels=labels)
+            outputs = model(input_ids=input_ids, labels=labels, return_dict=True)
         logits = outputs.logits
         shift_logits = logits[:, :-1, :]
         shift_labels = labels[:, 1:]
@@ -206,7 +206,7 @@ def music2text():
         return json.dumps({"error": "Invalid scale pitch provided"})
     
     # Tokenize the input text
-    inputs = tokenizer(text, return_tensors="pt")
+    inputs = tokenizer(text, return_tensors="pt", add_special_tokens=False)
     input_ids = inputs["input_ids"]
     
     # Get model predictions for the next token

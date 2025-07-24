@@ -278,6 +278,7 @@
       window.onload = () => {
         
         const synth = new Tone.Synth().toDestination();
+        synth.volume.value = .5;
         
         let currentVector = [1,2,3,4,5,6,7,8,9,10];
         Tone.Transport.start(0);
@@ -303,39 +304,36 @@
           flute: {
             "portamento" : 0.0,
             "oscillator": {
-                "type": "square4",
-                "partials": [1,1,1,1,1]
+                "type": "fatsine",
+                "partials": [1,1,.1,.2,.15,.01,.01,.01],
+                "partialCount": 8,
+                "modulationType": "sine4",
+                "phase": 1,
+                "spread": 20,
+                "count": 2
             },
             "envelope": {
-                "attack": 2,
-                "decay": 1,
-                "sustain": 0.2,
-                "release": 2
-            }
+                "attack": .5,
+                "decay": 2,
+                "sustain": 1,
+                "release": 1
+            },
           },
           violin: {
-            "portamento" : 0.0,
-            "harmonicity": 3.01,
-            "modulationIndex": 14,
+            "portamento" : 0.01,
             "oscillator": {
-                "type": "triangle",
-                "partials": [1,1,1,1,1]
+                "type": "fmsquare",
+                "modulationType": "sawtooth",
+                "harmonicity": 4,
+                "partials": [1,.6,.6,.7,.5,.2,.5,.15],
+                "partialCount": 8,
             },
             "envelope": {
-                "attack": 0.2,
+                "attack": 2.2,
                 "decay": 0.3,
-                "sustain": 0.1,
+                "sustain": 1,
                 "release": 1.2
             },
-            "modulation" : {
-                "type": "square"
-            },
-            "modulationEnvelope" : {
-                "attack": 0.01,
-                "decay": 0.5,
-                "sustain": 0.2,
-                "release": 0.1
-            }
           },
           theremin: {
             "portamento" : 0.07,
@@ -353,22 +351,35 @@
           piano: {
             "portamento" : 0.0,
             "oscillator": {
-                "type": "triangle",
+                "type": "amsine",
+                "modulationType": "triangle",
+                "harmonicity": .5,
                 "partials": [1,0.5, 0.3, 0.2,0.1]
             },
             "envelope": {
                 "attack": 0.001,
-                "decay": 1.2,
+                "decay": 2,
                 "sustain": 0,
-                "release": 1.2
+                "release": 3
             }
           },
           choir: {
-            "portamento" : 0.0,
+            "portamento" : 0.01,
             "oscillator": {
-                "type": "sine",
-                "partials": [1,1,1,1,1]
+                "type": "fatsine",
+                "modulationType": "sine4",
+                "partials": [1,1,.9,1,1.2,.4,.8, .7],
+                "partialCount": 2,
+                "spread": 10,
+                "phase": Math.PI*2,
+                "count": 4,
             },
+            "envelope": {
+                "attack": 2,
+                "decay": 0,
+                "sustain": 1,
+                "release": 2
+            }
           }
         };
 
@@ -513,7 +524,7 @@
                 const s = startIndex;
                 const e = endIndex;
                 durations[i] /= 8;
-                // synth.volume.value = volumes[i] / 2;
+                synth.volume.value = volumes[i] / 8;
                 
                 synth.triggerAttackRelease(notes[i], durations[i], delay);  
                 window.setTimeout(() => {
@@ -673,7 +684,7 @@
               console.log("keyup", lastKeyPress.key, parseInt(lastKeyPress.key), timeDiff, lastKeyPress.note);
               const text = document.getElementById("user-input").value;
               try {
-                fetchFromBackendReverse(text, scaleIntervals[currentScale].indexOf(parseInt(lastKeyPress.key) - 1));
+                fetchFromBackendReverse(text, scaleIntervals[currentScale][parseInt(lastKeyPress.key) - 1]);
                 const key = document.getElementById(convertSharpToFlat(lastKeyPress.note.toNote()));
                 key.classList.remove("highlight");
               }
