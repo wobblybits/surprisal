@@ -11,7 +11,7 @@
       }
       body {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         width: 100%;
         font-family: "Fredoka", sans-serif;
         background: darkslategray;
@@ -271,6 +271,113 @@
         /* border: 1px solid black;
         background: transparent;
         color: transparent; */
+      }
+      #explainer {
+        border-top-width: 50px;
+        border-top-style: solid;
+        border-top-color: transparent;
+        font-family: "Fredoka", sans-serif;
+        color: white;
+        max-width: 60%;
+        margin: auto;
+        text-align: left;
+        font-size: 1em;
+      }
+
+      #explainer h1 {
+        font-family: "Portfolio", Monospace;
+        color: white;
+        font-size:
+      }
+
+      #examples {
+        display: flex;
+        justify-content: center;
+        max-height: 200px;
+        margin: auto;
+        border-width: 10px;
+        border-style: solid;
+        border-color: transparent;
+        gap: 1em;
+      }
+
+      /* interactive example boxes */
+      #examples > div > div{
+        text-align: left;
+        border: 2px outset gray;
+        background: #aacc99;;
+        color:#333;
+        font-family: "Portfolio", Monospace;
+        margin: 2px;
+        border-radius: 12px;
+        box-sizing: border-box;
+        padding: .5em 0.5em;
+      }
+
+      .example-wrapper {
+        position: relative;
+        flex: 1 1;
+      }
+      .example {
+        cursor: pointer;
+        z-index: 1;
+        position: relative;
+      }
+
+      .example.hiding {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100;
+        z-index: 2;
+        display: none;
+      }
+
+      .example:not(.hiding) {
+        z-index: 1;
+      }
+      #equation {
+        text-align: center;
+        font-family: "Portfolio", Monospace;
+        font-size: 1em;
+        display: block;
+        max-width: 80%;
+        background-color: #aacc99;
+        padding: 20px;
+        margin: 10px;
+        border-radius: 5px;
+        color: #333;
+        text-shadow: 1px 1px 0 rgba(0,0,0,.2);
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      #demo-wrapper {
+        display: flex;
+        justify-content: center;
+        max-height: 200px;
+        border-width: 10px;
+        border-style: solid;
+        border-color: transparent;
+        gap: 1em;
+      }
+
+      #demo-wrapper div {
+        text-align: left;
+        border: 2px outset gray;
+        background: #aacc99;;
+        color:#333;
+        font-family: "Portfolio", Monospace;
+        margin: 2px;
+        border-radius: 12px;
+        box-sizing: border-box;
+        padding: .5em 0.5em;
+        cursor: pointer;
+      }
+
+      #explainer a {
+        color: lightblue;
       }
     </style>
     <script src="https://unpkg.com/tone"></script>
@@ -723,6 +830,54 @@
             lastKeyPress.time = null;
           }
         }
+
+        /* interactive examples */
+        document.getElementById("ex1").onclick = function() {
+          document.getElementById("ex1_hidden").classList.remove("hiding");
+          document.getElementById("ex1").classList.add("hiding");
+        }
+        document.getElementById("ex2").onclick = function() {
+          document.getElementById("ex2_hidden").classList.remove("hiding");
+          document.getElementById("ex2").classList.add("hiding");
+        }
+        document.getElementById("ex1_hidden").onclick = function() {
+          document.getElementById("ex1_hidden").classList.add("hiding");
+          document.getElementById("ex1").classList.remove("hiding");
+        }
+        document.getElementById("ex2_hidden").onclick = function() {
+          document.getElementById("ex2_hidden").classList.add("hiding");
+          document.getElementById("ex2").classList.remove("hiding");
+        }
+
+        document.getElementById("ex1_demo").onclick = function() { 
+          document.getElementById("user-input").value = "the man fed the cat some tuna."
+          const text = document.getElementById("user-input").value;
+          try {
+            fetchFromBackend(text);
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          catch (e) {
+            console.log(e);
+          }
+        }
+
+        document.getElementById("ex2_demo").onclick = function() { 
+          document.getElementById("user-input").value = "the lawyer presented the cat with a lawsuit."
+          const text = document.getElementById("user-input").value;
+          try {
+            fetchFromBackend(text);
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          catch (e) {
+            console.log(e);
+          }
+        }
       }
     </script>
   </head>
@@ -753,5 +908,54 @@
         
       </div>
     </div>
+    <div id="explainer">
+      <h1 id="heading">
+        The Surprisal Calculator WM7±2
+      </h1>
+
+        <p>On this page, we invite you to experiment with the <strong>Surprisal Calculator WM 7±2</strong>, a tool developed to turn the flow of information in human language into melodies. According to <strong>surprisal theory</strong>, the more surprising a sentence is, the longer it takes for the human brain to understand. To see this in action, consider the two sentences below:</p> 
+
+        <div id="examples">
+          <div class="example-wrapper">
+            <div id="ex1" class="example"> CLICK: sentence 1</div>
+            <div id="ex1_hidden" class="example hiding"> The man fed the <strong>cat</strong> some tuna.</div>
+          </div>
+          <div class="example-wrapper">
+            <div id="ex2" class="example"> CLICK: sentence 2</div>
+            <div id="ex2_hidden" class="example hiding"> The lawyer presented the <strong>cat</strong> with a lawsuit.</div>
+          </div>
+        </div>
+
+        <p>Even though the word <em>cat</em> appears in both sentences, it’s far more surprising in the context of the second sentence. Odds are that the second sentence also took you longer to process.</p>
+        <p>This seemingly fuzzy notion of “surprisingness” can actually be quantified using a formula first developed by Claude Shannon, the father of information theory. An event's surprisal is calculated as the negative log probability of that event happening in its given context. Applied to language, each word is an event, and the context is the sentence it appears in. Large language models, like GPT, provide a convenient way to calculate word probabilities in context.</p>
+        <div id="equation">
+          Surprisal(x) = -log<sub>2</sub> P(x | context)
+        </div>
+        <p>Coming back to our examples: in sentence 1, <em>cat</em> has a low surprisal value, because it appears in a sentence where talking about cats is very probable. In sentence 2, <em>cat</em> has a high surprisal value, because lawyers giving cats lawsuits is improbable.</p>
+
+        <p>Surprisal is a fascinating way to measure how the human brain handles unpredictability in language. However, surprisal numbers aren’t very intuitive to understand on their own. With the <strong>Surprisal Calculator WM 7±2</strong>, you can now input any sentence and hear its surprisal values translated to pitch intervals: a low pitch indicates low surprisal, and a high pitch indicates high surprisal.</p> 
+
+        <div id="demo-wrapper">
+          <div id="ex1_demo"> CLICK to hear sentence 1</div>
+          <div id="ex2_demo"> CLICK to hear sentence 2</div>
+        </div>
+
+        <p>The decision to translate surprisal numbers to musical pitches was not arbitrary. A good, informative sentence is made from a blend of predictability (low surprisal) and spontaneity (high surprisal); the same could also be said of a good melody. We quickly bore of a sentence made only of repetitive, predictable words (“he said that he thought that she said that they think that…”), we also quickly bore of a melody made of the same note, repeated over and over again. The delicate balancing act of predictability and spontaneity that plays out in both language and music seems to hint at a shared cognitive architecture used in both forms of expression.</p>
+        <h1 id="how-to-use-the-surprisal-calculator-wm-72">How to use the
+        Surprisal Calculator WM 7±2</h1>
+        <ul>
+        <li><p>Type any sentence in, and press <code>compose</code> to hear its surprisal values.</p></li>
+        <li><p>Use the calculator buttons to adjust instrument type, the LLM used to calculate probability scores, and the scale used to match surprisal numbers to pitches.</p></li>
+        <li><p>Try typing the beginning of a sentence, then clicking keys on the keyboard. This will generate text with the surprisal values corresponding to the key pitch: experiment with what a very low surprisal or very high surprisal sentence sounds like. We suggest playing a common melody on the keyboard (“jingle bells” is a good candidate). Good melodies, which balance repetition with variety, tend to generate good sentences.</p></li></ul>
+        
+        <h1>Sources and Code</h1>
+        <p>TODO: add link to github repository.</p>
+        <p><a href="https://aclanthology.org/2023.tacl-1.82/">Testing the Predictions of Surprisal Theory in 11 Languages</a> (Wilcox et al., TACL 2023)</p>
+
+        <p><a href="https://doi.org/10.1016/j.cognition.2007.05.006"> Expectation-based syntactic comprehension</a> (Levy, Cognition 2008)</p>
+        <p><a href="https://doi.org/10.1002/j.1538-7305.1948.tb01338.x">A mathematical theory of communication</a> (Shannon, 1948)</p>
+      </div>
+
+
   </body>
 </html>
