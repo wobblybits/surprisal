@@ -4,3 +4,6 @@ NLTK
 numpy
 surprisal[transformers]
 wordfreq
+tiktoken
+protobuf
+blobfile

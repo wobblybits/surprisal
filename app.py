@@ -35,8 +35,8 @@ models = {
         "whitespace": ' '  # Regular space
     },
     "smol llama": {
-        "tokenizer": AutoTokenizer.from_pretrained("BEE-spoke-data/smol_llama-101M-GQA"),
-        "model": AutoModelForCausalLM.from_pretrained("BEE-spoke-data/smol_llama-101M-GQA"),
+        "tokenizer": AutoTokenizer.from_pretrained("Felladrin/Smol-Llama-101M-Chat-v1"),
+        "model": AutoModelForCausalLM.from_pretrained("Felladrin/Smol-Llama-101M-Chat-v1"),
         "type": "causal",
         "whitespace": ' '  # Regular space
     }, 
