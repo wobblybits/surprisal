@@ -34,12 +34,12 @@ models = {
         "type": "causal",
         "whitespace": ' '  # Regular space
     },
-    "smol llama": {
-        "tokenizer": AutoTokenizer.from_pretrained("Felladrin/Smol-Llama-101M-Chat-v1"),
-        "model": AutoModelForCausalLM.from_pretrained("Felladrin/Smol-Llama-101M-Chat-v1"),
-        "type": "causal",
-        "whitespace": ' '  # Regular space
-    }, 
+    # "smol llama": {
+    #     "tokenizer": AutoTokenizer.from_pretrained("Felladrin/Smol-Llama-101M-Chat-v1"),
+    #     "model": AutoModelForCausalLM.from_pretrained("Felladrin/Smol-Llama-101M-Chat-v1"),
+    #     "type": "causal",
+    #     "whitespace": ' '  # Regular space
+    # }, 
     "qwen": {
         "tokenizer": AutoTokenizer.from_pretrained("KingNish/Qwen2.5-0.5b-Test-ft"),
         "model": AutoModelForCausalLM.from_pretrained("KingNish/Qwen2.5-0.5b-Test-ft"),
@@ -54,6 +54,7 @@ models = {
     }
 }
 
+# set default model to gpt2
 current_model = "gpt2"
 tokenizer = models[current_model]["tokenizer"]
 model = models[current_model]["model"]
@@ -133,28 +134,35 @@ def backend():
         logits = outputs.logits
         shift_logits = logits[:, :-1, :]
         shift_labels = labels[:, 1:]
-
+    
+    # calculates natural log probabilities of tokens
     log_probs = F.log_softmax(shift_logits, dim=-1)
     token_log_probs = log_probs.gather(2, shift_labels.unsqueeze(-1)).squeeze(-1)
     
+    # converts to log base 2 and makes negative, for surprisal formula
     surprisals = -token_log_probs[0] / math.log(2)
-    surprisals = [0] + surprisals.tolist() # padding since first token has no surprisal info
-
+    # padding since first token has no surprisal info
+    surprisals = [0] + surprisals.tolist() 
+    
+    # formats tokens for display
     tokens = tokenizer.convert_ids_to_tokens(input_ids[0])[:]
     tokens = process_tokens_for_display(tokens, models[current_model]["whitespace"])
     
+    # fetches word lengths; determines note duration
     lengths = [len(i) for i in tokens]
 
+    # fetches word frequencies; determines note volume
     frequencies = [wordfreq.zipf_frequency(i, "en") for i in tokens]
     # setting minimum frequency value at 0.5 to avoid silent notes
     frequencies_inverted = [max((8 - i), 0.5) for i in frequencies]
+    
+    # this data gets translated into audio in javascript frontend
     return json.dumps({"surprisals": surprisals,
                     "tokens": tokens,
                     "lengths": lengths,
                     "frequencies": frequencies,
                     "frequencies_inverted": frequencies_inverted})
     
-
 @app.route('/')
 def frontend():
     return render_template('wireframe.html')
@@ -182,13 +190,7 @@ def assets(filename):
     except Exception as e:
         return make_response(f"Error: {str(e)}", 500)
 
-@app.route('/test/')
-def test():
-    g = surprisal.AutoHuggingFaceModel.from_pretrained(model_id="gpt2")
-    surps = [*g.surprise(["Hello, World!"])]
-    return json.dumps({"surprisals": surps[0].surprisals, "tokens": surps[0].tokens})
-
-
+# play notes to generate text with appropriate surprisal values
 @app.route('/reverse/', methods=['POST']) 
 def music2text():
     # Get text and note from POST request body
@@ -205,6 +207,13 @@ def music2text():
     except ValueError:
         return json.dumps({"error": "Invalid scale pitch provided"})
     
+    started_new_sequence = False
+    # if input field is empty, add beginning of speech token
+    if text == "":
+        bos_token = tokenizer.bos_token or "The "
+        text = bos_token
+        started_new_sequence = True
+
     # Tokenize the input text
     inputs = tokenizer(text, return_tensors="pt", add_special_tokens=False)
     input_ids = inputs["input_ids"]
@@ -227,12 +236,6 @@ def music2text():
     # Calculate surprisals for all possible next tokens
     log_probs = F.log_softmax(next_token_logits, dim=-1)
     surprisals = -log_probs / math.log(2)  # Shape: [vocab_size]
-    
-    # Find which surprisal value would produce the target pitch
-    # From convert_to_scale: pitch = minor_intervals[int(surprisal/2)]
-    # So: surprisal = 2 * index where minor_intervals[index] == target_pitch
-    # minor_intervals = [0,2,3,5,7,8,10,12,14,15,17,18,19,20,22]
-    # scale_intervals = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]
     
     # Find the index in minor_intervals that matches target_pitch
     target_surprisal = target_pitch * 2
@@ -265,6 +268,10 @@ def music2text():
             "pitch": token_pitch
         })
     
+    # don't return added beginning of speech token as part of text
+    if started_new_sequence:
+        text = ""
+
     return json.dumps({
         "input_text": text,
         "target_pitch": target_pitch,
