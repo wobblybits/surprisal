@@ -125,7 +125,10 @@
         function convertToContinuous(surprisals) {
           let converted_pitches = [];
           for (let i = 0; i < surprisals.length; i++) {
-            converted_pitches.push((surprisals[i] * 50).toString());
+            // uses midi number to frequency conversion formula
+            // similar to chromatic scale, 0 = c3 and 0.5 = d3; surprisals are divided by 2 to squish range
+            let new_pitch = Math.pow(2, (48 + surprisals[i]/2 - 69)/12) * 440
+            converted_pitches.push(new_pitch.toString());
           }
           // set first note to c3 since 0hz isn't audible
           converted_pitches[0] = 130; 
