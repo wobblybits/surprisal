@@ -1,0 +1,445 @@
+@font-face {
+  font-family: "Portfolio";
+  src: url("../assets/portfolio.woff") format("woff");
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  font-family: "Fredoka", sans-serif;
+  background: darkslategray;
+  padding: 2em 0;
+  text-align: center;
+}
+h4 {
+  font-weight: 100;
+  font-style: italic;
+  padding: 0;
+  margin: 0;
+  width: auto;
+  height: 3em;
+  font-size: 80%;
+  line-height: 150%;
+  text-align: center;
+}
+strong {
+  font-weight: 400;
+  color: #aacc99;
+}
+#container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  min-width: 875px;
+  max-width: 1000px;
+  margin: auto;
+  position: relative;
+  min-height: 100%;
+  height: calc(100% - 4em);
+}
+#calculator {
+  display: flex;
+  border: 2px solid black;
+  flex-direction: column;
+  flex-wrap: wrap;
+  flex: 1;
+  width: calc(50% - 2em);
+  background: gray;
+  height: calc(100% - 3px);
+  border-radius: 3px;
+  overflow: auto;
+}
+#title {
+  display: block;
+  flex-shrink: 2;
+  padding: 1em 2em 0;
+  text-align: right;
+  width: calc(100% - 4em);
+  /* font-style: italic; */
+  /* font-family: 'Coiny'; */
+  font-weight: 600;
+  color: lightgray;
+  /* font-size: 70%; */
+  text-shadow: -1px -1px 0 black, 1px 1px 0 black, 1px -1px 0 black,
+    -1px 1px 0 black, -1px 0 0 black, 1px 0 0 black, 0 1px 0 black,
+    0 -1px 0 black, 0 0 6px rgba(0, 0, 0, 0);
+  letter-spacing: 2px;
+  filter: saturate(0.6);
+  /* mix-blend-mode: screen; */
+  opacity: 0.6;
+}
+#display {
+  padding: 1em 2em 0;
+  height: 33%;
+  display: flex;
+  flex-direction: column;
+}
+#display #user-input {
+  background: #aacc99;
+  font-family: "Portfolio", Monospace;
+  width: calc(100%);
+  padding: 2em 1em 1em;
+  outline: none;
+  font-size: 16px;
+  line-height: 24px;
+  border: 2px darkgray inset;
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-radius: 6px;
+  color: #333;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+  min-height: 85%;
+  height: 95%;
+  margin-top: -4px;
+}
+#display #indicator {
+  background: #aacc99;
+  text-align: center;
+  vertical-align: middle;
+  font-family: "Portfolio", Monospace;
+  width: calc(100% - 2em - 4px);
+  padding: 0 1em;
+  outline: none;
+  /* font-size: 10px; */
+  /* line-height: 3%; */
+  border: 2px darkgray inset;
+  border-bottom: none;
+  border-radius: 6px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  color: #333;
+  min-height: 3%;
+  height: 3%;
+  z-index: 9999999;
+}
+#display #indicator span {
+  display: inline-block;
+  padding: 0.5em 0 0;
+  font-size: 0.8em;
+  width: 100px;
+  margin: 0px 8px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+  color: #333;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+  /* background: linear-gradient(to right, rgba(0,0,0,.05) 0px, rgba(0,0,0,.05) 1px, transparent 1px); */
+  background-size: 4px;
+  background-repeat: repeat;
+}
+#display textarea:focus {
+  outline: none;
+}
+#display textarea::selection {
+  background: #333;
+  color: #aacc99;
+}
+#buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: masonry;
+  gap: 5px 10px;
+  flex: 0 0;
+  margin: 1em 0 0 2em;
+  text-transform: uppercase;
+  font-weight: 400;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.2);
+  color: #333;
+  max-width: calc(100% - 4em);
+  align-items: flex-start;
+  max-height: calc(66% - 6em);
+}
+#buttons > div {
+  display: flex;
+  text-align: center;
+  flex-flow: column wrap;
+}
+#buttons > div:not(#scales) > div,
+#scales > div > div {
+  display: inline-block;
+  flex-flow: column wrap;
+  border: 2px outset gray;
+  background: pink;
+  margin: 2px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  box-sizing: border-box;
+  flex: 1 1;
+  padding: 0.5em 1em;
+}
+#buttons > div > div > img {
+  object-fit: cover;
+  max-width: 32px;
+  max-height: 32px;
+  filter: drop-shadow(0px 0px 20px rgba(205, 205, 255, 0.3));
+}
+#buttons > div#scales {
+  flex-flow: row wrap;
+  flex: 4;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+#buttons > div#scales > div {
+  flex: 1 1;
+  background: transparent;
+  flex-flow: column wrap;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  position: relative;
+  padding-top: 6px;
+  border-radius: 10px;
+  padding-bottom: 4px;
+}
+
+#buttons > div#scales > div > div {
+  background: #ddddff;
+  width: calc(100% - 8px);
+}
+
+#buttons > div#scales > div:before {
+  content: attr(id);
+  text-transform: lowercase;
+  font-size: 75%;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -60%);
+  z-index: 100;
+  color: white;
+  background: gray;
+  padding: 0 4px;
+  font-weight: 100;
+}
+
+#buttons > div#scales > div {
+  flex: 1 1;
+  /* background: #ddddff; */
+}
+#buttons > div#models {
+  flex-flow: column wrap;
+  flex: 3;
+  grid-column: 2 / 2;
+  grid-row: 1 / 1;
+  grid-row-end: span 2;
+}
+#buttons > div#models > div {
+  flex: 2 0;
+  background: #ffeeff;
+  min-width: 80%;
+}
+#buttons > div#instruments {
+  flex-flow: row wrap;
+  flex: 1;
+  gap: 3px;
+  grid-row-end: span 2;
+  text-align: center;
+  align-content: center;
+}
+#buttons > div#instruments > div {
+  flex: 1 1 15%;
+  /* min-width: 15%; */
+  background: #777799;
+  padding: 0.5em;
+}
+#buttons #translate {
+  display: grid;
+  grid-row: 3 / 2;
+  grid-column: 2 / 2;
+  grid-row-end: span 1;
+  padding-bottom: 4px;
+}
+#buttons #translate div {
+  height: 100%;
+  align-content: center;
+  justify-content: center;
+}
+#buttons > div:not(#scales) > div:hover,
+#buttons > div#scales > div > div:hover {
+  background: darkslateblue;
+  border: 2px inset darkslateblue;
+  color: white;
+  cursor: pointer;
+}
+#buttons > div > div:hover img {
+  filter: invert(1);
+}
+#buttons > div > div#submit {
+  background: orange;
+  margin-bottom: 1em;
+}
+#buttons > div > div#submit:hover {
+  background: red;
+}
+#keyboard {
+  display: flex;
+  border-left: 10px solid darkslategrey;
+  width: calc(50% - 2em);
+  position: relative;
+  background: linear-gradient(
+    to right,
+    black 0px,
+    black 2px,
+    transparent 2px,
+    transparent 100%
+  );
+  background-repeat: no-repeat;
+  flex: 1;
+}
+#keyboard > div {
+  position: absolute;
+  left: 0;
+  text-align: right;
+  padding-right: 2em;
+  align-content: center;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+  border-left: 1px solid black;
+  cursor: pointer;
+}
+#keyboard .white-key:hover,
+#keyboard .white-key.highlight {
+  background: pink;
+  color: black;
+}
+#keyboard .black-key:hover,
+#keyboard .black-key.highlight {
+  background: purple;
+  color: white;
+  mix-blend-mode: normal;
+  border: 1px solid black;
+}
+#keyboard .white-key {
+  background: white;
+  border: 2px solid black;
+  border-left: 2px solid black;
+  height: 6.5%;
+  width: calc(100% - 3em); /* subtract padding*/
+  color: white;
+}
+#keyboard .black-key {
+  background: black;
+  width: 50%;
+  height: 6%;
+  z-index: 99;
+  border: 2px solid white;
+  border-left: 1px solid transparent;
+  left: 1px;
+  color: black;
+  mix-blend-mode: multiply;
+}
+#keyboard .disabled {
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.25;
+  /* border: 1px solid black;
+    background: transparent;
+    color: transparent; */
+}
+#explainer {
+  border-top-width: 50px;
+  border-top-style: solid;
+  border-top-color: transparent;
+  font-family: "Fredoka", sans-serif;
+  color: white;
+  max-width: 60%;
+  margin: auto;
+  text-align: left;
+  font-size: 1em;
+}
+
+#explainer h1 {
+  font-family: "Portfolio", Monospace;
+  color: white;
+  font-size: ;
+}
+
+#examples {
+  display: flex;
+  justify-content: center;
+  max-height: 200px;
+  margin: auto;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent;
+  gap: 1em;
+}
+
+/* interactive example boxes */
+#examples > div > div {
+  text-align: left;
+  border: 2px outset gray;
+  background: #aacc99;
+  color: #333;
+  font-family: "Portfolio", Monospace;
+  margin: 2px;
+  border-radius: 12px;
+  box-sizing: border-box;
+  padding: 0.5em 0.5em;
+}
+
+.example-wrapper {
+  position: relative;
+  flex: 1 1;
+}
+.example {
+  cursor: pointer;
+  z-index: 1;
+  position: relative;
+}
+
+.example.hiding {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100;
+  z-index: 2;
+  display: none;
+}
+
+.example:not(.hiding) {
+  z-index: 1;
+}
+#equation {
+  text-align: center;
+  font-family: "Portfolio", Monospace;
+  font-size: 1em;
+  display: block;
+  max-width: 80%;
+  background-color: #aacc99;
+  padding: 20px;
+  margin: 10px;
+  border-radius: 5px;
+  color: #333;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#demo-wrapper {
+  display: flex;
+  justify-content: center;
+  max-height: 200px;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent;
+  gap: 1em;
+}
+
+#demo-wrapper div {
+  text-align: left;
+  border: 2px outset gray;
+  background: #aacc99;
+  color: #333;
+  font-family: "Portfolio", Monospace;
+  margin: 2px;
+  border-radius: 12px;
+  box-sizing: border-box;
+  padding: 0.5em 0.5em;
+  cursor: pointer;
+}
+
+#explainer a {
+  color: lightblue;
+}
