@@ -547,6 +547,35 @@ strong {
   background: var(--bg-button-submit-hover);
 }
 
+/* Disabled button styles for models */
+#buttons > div#models > div.disabled {
+  background: #cccccc !important;
+  color: #666666 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+  border: var(--border-standard) solid #999999 !important;
+  position: relative;
+}
+
+#buttons > div#models > div.disabled:hover {
+  background: #cccccc !important;
+  border: var(--border-standard) solid #999999 !important;
+  color: #666666 !important;
+  cursor: not-allowed !important;
+}
+
+#buttons > div#models > div.disabled::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(128, 128, 128, 0.3);
+  pointer-events: none;
+  border-radius: var(--radius-lg);
+}
+
 #keyboard {
   display: flex;
   border-left: var(--border-keyboard-left);

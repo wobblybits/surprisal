@@ -128,11 +128,23 @@ export const ValidationUtils = {
     return true;
   },
 
-  validateModelSelection(modelName) {
-    // Note: This will be enhanced in the app file with actual model data
+  validateModelSelection(modelName, app = null) {
     if (!modelName) {
       throw new Error(`Invalid model: ${modelName}`);
     }
+    
+    // If app instance is provided, check model availability
+    if (app && app.modelAvailability) {
+      if (app.modelAvailability.disabled.includes(modelName)) {
+        throw new Error(`Model '${modelName}' is not available in this deployment`);
+      }
+      
+      if (!app.modelAvailability.available.includes(modelName) && 
+          !app.modelAvailability.all.includes(modelName)) {
+        throw new Error(`Unknown model: ${modelName}`);
+      }
+    }
+    
     return true;
   },
 
