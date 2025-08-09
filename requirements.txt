@@ -2,7 +2,6 @@ Flask
 gunicorn
 NLTK
 numpy
-surprisal[transformers]
 wordfreq
 tiktoken
 protobuf
