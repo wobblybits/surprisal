@@ -20,6 +20,8 @@ export class SurprisalApp {
       scales: {},
       toneOutput: null,
       isLoading: false,
+      isPlaying: false,
+      playbackTimeouts: [], // Track timeouts for cancellation
       
       updateSettings: (newSettings) => {
         this.state.currentSettings = newSettings;
@@ -83,9 +85,51 @@ export class SurprisalApp {
     return duration;
   }
 
+  // Add method to stop current melody
+  stopMelody() {
+    try {
+      if (this.state.isPlaying) {
+        // Cancel all scheduled timeouts
+        this.state.playbackTimeouts.forEach(timeoutId => {
+          clearTimeout(timeoutId);
+        });
+        this.state.playbackTimeouts = [];
+        
+        // Stop all playing sounds
+        if (this.state.toneOutput) {
+          this.state.toneOutput.triggerRelease();
+        }
+        
+        // Clear any highlighted keys
+        document.querySelectorAll('#keyboard .highlight').forEach(key => {
+          key.classList.remove('highlight');
+        });
+        
+        // Reset text selection
+        const userInput = document.getElementById('user-input');
+        if (userInput) {
+          userInput.blur();
+          userInput.setSelectionRange(
+            this.uiSettings.selectionReset.startPos, 
+            this.uiSettings.selectionReset.endPos
+          );
+        }
+        
+        this.state.isPlaying = false;
+        AccessibilityUtils.announceToScreenReader('Melody stopped');
+      }
+    } catch (error) {
+      ErrorHandler.logError(error, 'stopMelody');
+      this.state.isPlaying = false;
+    }
+  }
+
   async playMelody(data) {
     try {
       await Tone.start();
+      this.state.isPlaying = true;
+      this.state.playbackTimeouts = []; // Reset timeouts array
+      
       const surprisals = data.surprisals;
       let pitches = [];
       let notes = [];
@@ -111,6 +155,7 @@ export class SurprisalApp {
 
       let startIndex = 0;
       let endIndex = 0;
+      let totalDuration = 0;
 
       for (let i = 0; i < surprisals.length; i++) {
         timeouts.push(delay);
@@ -125,7 +170,8 @@ export class SurprisalApp {
         this.state.toneOutput.volume.value = volumes[i] / this.audioSettings.volumeScaling;
         
         this.state.toneOutput.triggerAttackRelease(notes[i], durations[i], delay);  
-        window.setTimeout(() => {
+        
+        const highlightTimeoutId = window.setTimeout(() => {
           try {
             const key = document.getElementById(this.convertSharpToFlat(notes[i].toNote()));
             if (key) {
@@ -133,7 +179,7 @@ export class SurprisalApp {
             }
             userInput.setSelectionRange(startPos, endPos);
             userInput.focus();
-            window.setTimeout(() => {
+            const cleanupTimeoutId = window.setTimeout(() => {
               try {
                 userInput.blur();
                 userInput.setSelectionRange(
@@ -147,14 +193,33 @@ export class SurprisalApp {
                 ErrorHandler.logError(error, 'playMelody cleanup');
               }
             }, Tone.Time(durations[i]).toSeconds() * this.audioSettings.playback.highlightDurationMultiplier);
+            
+            // Track cleanup timeout too
+            this.state.playbackTimeouts.push(cleanupTimeoutId);
           } catch (error) {
             ErrorHandler.logError(error, 'playMelody highlight');
           }
         }, (Tone.Time(timeouts[i]).toSeconds() - offset) * this.audioSettings.playback.timeoutConversionMs);
+        
+        // Track highlight timeout
+        this.state.playbackTimeouts.push(highlightTimeoutId);
+        
         delay += durations[i];
         startIndex = endIndex;
+        totalDuration = delay;
       }
+      
+      // Set isPlaying to false when the melody finishes
+      const finishTimeoutId = window.setTimeout(() => {
+        this.state.isPlaying = false;
+        this.state.playbackTimeouts = [];
+      }, (Tone.Time(totalDuration).toSeconds() - offset) * this.audioSettings.playback.timeoutConversionMs);
+      
+      this.state.playbackTimeouts.push(finishTimeoutId);
+      
     } catch (error) {
+      this.state.isPlaying = false;
+      this.state.playbackTimeouts = [];
       ErrorHandler.logError(error, 'playMelody');
       ErrorHandler.showError(`Failed to play melody: ${error.message}`);
     }
@@ -528,8 +593,14 @@ export class SurprisalApp {
     if (submitButton) {
       submitButton.onclick = (event) => {
         try {
-          const text = document.getElementById("user-input").value;
-          this.fetchFromBackend(text);
+          if (this.state.isPlaying) {
+            // If currently playing, stop the melody
+            this.stopMelody();
+          } else {
+            // If not playing, compose and play new melody
+            const text = document.getElementById("user-input").value;
+            this.fetchFromBackend(text);
+          }
         } catch (error) {
           ErrorHandler.logError(error, 'submit button');
           ErrorHandler.showError(`Failed to submit: ${error.message}`);
