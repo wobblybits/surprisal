@@ -14,7 +14,7 @@ export RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-20}
 export RATE_LIMIT_PER_HOUR=${RATE_LIMIT_PER_HOUR:-500}
 
 # Security settings
-export CSRF_ENABLED=${CSRF_ENABLED:-True}
+export CSRF_ENABLED=${CSRF_ENABLED:-False}
 
 # Model configuration for production (memory optimization)
 export ENABLED_MODELS=${ENABLED_MODELS:-gpt2,distilgpt2,smollm,flan}
