@@ -77,24 +77,6 @@ export const presets = {
   cat: {
     sampler: true,
   }
-  // choir: {
-  //   portamento: 0.01,
-  //   oscillator: {
-  //     type: "fatsine",
-  //     modulationType: "sine4",
-  //     partials: [1, 1, 0.9, 1, 1.2, 0.4, 0.8, 0.7],
-  //     partialCount: 2,
-  //     spread: 10,
-  //     phase: Math.PI * 2,
-  //     count: 4,
-  //   },
-  //   envelope: {
-  //     attack: 2,
-  //     decay: 0,
-  //     sustain: 1,
-  //     release: 2,
-  //   },
-  // },
 };
 
 export const scaleIntervals = {
@@ -117,4 +99,100 @@ export const scaleIntervals = {
 
 export const notes = ["A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab"];
  
-export const models = ["gpt2", "smollm", "nano mistral", "smol llama", "qwen", "flan"];
+export const models = ["gpt2", "smollm", "nano mistral", "qwen", "flan"];
+
+// Application Settings - Core app behavior and limits
+export const applicationSettings = {
+  maxTextLength: 1000,  // Default - will sync with backend via API
+  modelNameDisplayLength: 10,
+  settingsIndices: {
+    instrument: 0,
+    scale: 1,
+    model: 2
+  },
+  keyboardRange: {
+    minKey: 1,
+    maxKey: 9
+  },
+  defaultSettings: ["THEREMIN", "MAJOR-7", "GPT2"],
+  defaultVector: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+};
+
+// Audio Settings - Musical and audio processing parameters
+export const audioSettings = {
+  volumeScaling: 8,
+  surprisalDivisor: 2,
+  baseNote: "C3",
+  defaultVolume: 0.5,
+  transportStart: 0,
+  noteDuration: "8n",
+  continuousPitch: {
+    baseNote: 48,
+    referenceNote: 69,
+    baseFrequency: 440,
+    c3Frequency: 130,
+    pitchCalculation: {
+      semitonesPerOctave: 12
+    }
+  },
+  keyboard: {
+    numOctaves: 2,
+    startingOctave: 3,
+    startingNote: "C",
+    semitonesPerOctave: 12,
+    spacing: {
+      whiteKeys: 7,
+      numKeysPastOctave: 0
+    }
+  },
+  playback: {
+    highlightDurationMultiplier: 900,
+    timeoutConversionMs: 1000
+  }
+};
+
+// UI Settings - User interface behavior and styling
+export const uiSettings = {
+  debounceDelay: 50,
+  errorDisplayDuration: 5000,
+  announcementDelay: 1000,
+  selectionReset: {
+    startPos: 0,
+    endPos: 0
+  },
+  zIndex: {
+    overlay: 1000,
+    error: 1000
+  },
+  positioning: {
+    center: "50%",
+    centerTransform: "translate(-50%, -50%)"
+  },
+  opacity: {
+    loadingBackground: "rgba(0,0,0,0.8)"
+  },
+  spinner: {
+    borderRadius: "50%",
+    size: "40px",
+    borderWidth: "4px",
+    marginBottom: "10px"
+  },
+  boxShadow: {
+    error: "0 2px 10px rgba(0,0,0,0.3)"
+  }
+};
+
+// Validation Settings - Input validation parameters
+export const validationSettings = {
+  textInput: {
+    maxLength: 1000, // Will be updated from backend
+    minLength: 0
+  },
+  noteLength: {
+    minLength: 1
+  },
+  arrayIndices: {
+    noteChar: 1,
+    noteOctave: 2
+  }
+};

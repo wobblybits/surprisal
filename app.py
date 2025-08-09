@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, send_file, make_response
+from flask import Flask, request, render_template, send_file, make_response, jsonify
 import os
 from werkzeug.utils import secure_filename
 import json
@@ -7,7 +7,51 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModelForSeq2SeqLM
 import torch.nn.functional as F
 import math
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_wtf.csrf import CSRFProtect
+import secrets
+import time
+
 app = Flask(__name__)
+
+# Environment Configuration
+MAX_TEXT_LENGTH = int(os.getenv('MAX_TEXT_LENGTH', 1000))
+DEBUG_MODE = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+HOST = os.getenv('FLASK_HOST', '0.0.0.0')
+PORT = int(os.getenv('FLASK_PORT', 8001))
+
+# Security Configuration
+SECRET_KEY = os.getenv('FLASK_SECRET_KEY')
+if not SECRET_KEY:
+    if DEBUG_MODE:
+        SECRET_KEY = 'dev-key-not-for-production'
+        print("WARNING: Using default secret key. Set FLASK_SECRET_KEY in production!")
+    else:
+        raise ValueError("FLASK_SECRET_KEY environment variable must be set in production")
+
+app.config['SECRET_KEY'] = SECRET_KEY
+
+# CSRF Protection
+CSRF_ENABLED = os.getenv('CSRF_ENABLED', 'True').lower() == 'true'
+if CSRF_ENABLED:
+    csrf = CSRFProtect(app)
+
+# Rate Limiting Configuration
+RATE_LIMIT_STORAGE_URL = os.getenv('RATE_LIMIT_STORAGE_URL', 'memory://')
+RATE_LIMIT_PER_MINUTE = os.getenv('RATE_LIMIT_PER_MINUTE', '10')
+RATE_LIMIT_PER_HOUR = os.getenv('RATE_LIMIT_PER_HOUR', '100')
+
+limiter = Limiter(
+    app,
+    key_func=get_remote_address,
+    storage_uri=RATE_LIMIT_STORAGE_URL,
+    default_limits=[f"{RATE_LIMIT_PER_HOUR} per hour"],
+    headers_enabled=True
+)
+
+# Application startup time for health check
+app_start_time = time.time()
 
 counter = 0
 
@@ -18,10 +62,6 @@ models = {
         "type": "causal",
         "whitespace": 'Ġ'
     },
-    # "r1-1776": {
-    #     "tokenizer": AutoTokenizer.from_pretrained("perplexity-ai/r1-1776"),
-    #     "model": AutoModelForCausalLM.from_pretrained("perplexity-ai/r1-1776")
-    # },
     "smollm": {
         "tokenizer": AutoTokenizer.from_pretrained("HuggingFaceTB/SmolLM-135M"),
         "model": AutoModelForCausalLM.from_pretrained("HuggingFaceTB/SmolLM-135M"),
@@ -34,12 +74,6 @@ models = {
         "type": "causal",
         "whitespace": ' '  # Regular space
     },
-    # "smol llama": {
-    #     "tokenizer": AutoTokenizer.from_pretrained("Felladrin/Smol-Llama-101M-Chat-v1"),
-    #     "model": AutoModelForCausalLM.from_pretrained("Felladrin/Smol-Llama-101M-Chat-v1"),
-    #     "type": "causal",
-    #     "whitespace": ' '  # Regular space
-    # }, 
     "qwen": {
         "tokenizer": AutoTokenizer.from_pretrained("KingNish/Qwen2.5-0.5b-Test-ft"),
         "model": AutoModelForCausalLM.from_pretrained("KingNish/Qwen2.5-0.5b-Test-ft"),
@@ -53,11 +87,6 @@ models = {
         "whitespace": ' '  # Regular space
     }
 }
-
-# set default model to gpt2
-# current_model = "gpt2" # DELETE THIS
-# tokenizer = models[current_model]["tokenizer"] # DELETE THIS
-# model = models[current_model]["model"] # DELETE THIS
 
 
 def process_tokens_for_display(tokens, whitespace_char):
@@ -117,13 +146,54 @@ def validate_text_input(text):
     if len(text.strip()) == 0:
         raise ValueError("Text input cannot be empty")
     
-    # Reasonable length limit to prevent memory issues
-    if len(text) > 1000:
-        raise ValueError(f"Text too long: {len(text)} chars (max 1000)")
+    # Use configurable length limit
+    if len(text) > MAX_TEXT_LENGTH:
+        raise ValueError(f"Text too long: {len(text)} chars (max {MAX_TEXT_LENGTH})")
     
     return text  # Return original text, no sanitization
 
+# Health Check Endpoint
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for monitoring and load balancers."""
+    try:
+        # Check if models are loaded
+        model_status = {}
+        for model_name in models:
+            try:
+                # Quick test to ensure model is accessible
+                model_status[model_name] = "healthy"
+            except Exception as e:
+                model_status[model_name] = f"error: {str(e)}"
+        
+        # Calculate uptime
+        uptime_seconds = time.time() - app_start_time
+        uptime_minutes = uptime_seconds / 60
+        
+        health_data = {
+            "status": "healthy",
+            "timestamp": time.time(),
+            "uptime_seconds": uptime_seconds,
+            "uptime_minutes": round(uptime_minutes, 2),
+            "models": model_status,
+            "config": {
+                "max_text_length": MAX_TEXT_LENGTH,
+                "debug_mode": DEBUG_MODE,
+                "csrf_enabled": CSRF_ENABLED
+            }
+        }
+        
+        return jsonify(health_data), 200
+        
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": time.time()
+        }), 503
+
 @app.route('/process/', methods=['POST'])
+@limiter.limit(f"{RATE_LIMIT_PER_MINUTE} per minute")
 def process_text():
     try:
         # Proper error handling for JSON parsing
@@ -209,11 +279,6 @@ def process_text():
 def frontend():
     return render_template('wireframe.html')
 
-# Remove the model switching endpoint - no longer needed!
-# @app.route('/model/<string:model_name>', methods=['GET'])
-# def change_model(model_name):
-#     ... DELETE THIS ENTIRE FUNCTION
-
 @app.route('/assets/<path:filename>', methods=['GET'])
 def serve_assets(filename):
     try:
@@ -237,6 +302,7 @@ def serve_assets(filename):
 
 # play notes to generate text with appropriate surprisal values
 @app.route('/reverse/', methods=['POST']) 
+@limiter.limit(f"{RATE_LIMIT_PER_MINUTE} per minute")
 def music_to_text():
     try:
         # Proper error handling for JSON parsing
@@ -253,8 +319,8 @@ def music_to_text():
             model_name = request.form.get('model', "gpt2")
         
         # Validate inputs
-        if text and len(text) > 1000:
-            return json.dumps({"error": f"Text too long: {len(text)} chars (max 1000)"}), 400
+        if text and len(text) > MAX_TEXT_LENGTH:
+            return json.dumps({"error": f"Text too long: {len(text)} chars (max {MAX_TEXT_LENGTH})"}), 400
         
         validated_model = validate_model_name(model_name)
         
@@ -354,6 +420,7 @@ def music_to_text():
 
 
 @app.route('/debug_tokens/<string:model_name>', methods=['GET'])
+@limiter.limit("5 per minute")  # Lower limit for debug endpoint
 def debug_tokens(model_name):
     """Debug endpoint to see what tokens each model produces."""
     if model_name not in models:
@@ -370,6 +437,31 @@ def debug_tokens(model_name):
         "whitespace_char": models[model_name]["whitespace"]
     })
 
+# Rate limit error handler
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return jsonify({
+        "error": "Rate limit exceeded",
+        "message": "Too many requests. Please try again later.",
+        "retry_after": getattr(e, 'retry_after', None)
+    }), 429
+
+# CSRF error handler
+if CSRF_ENABLED:
+    @app.errorhandler(400)
+    def csrf_error(reason):
+        if 'csrf' in str(reason).lower():
+            return jsonify({
+                "error": "CSRF token missing or invalid",
+                "message": "Please include a valid CSRF token with your request"
+            }), 400
+        return jsonify({"error": "Bad request"}), 400
+
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=8001)
+    print(f"Starting Surprisal Calculator...")
+    print(f"Rate limiting: {RATE_LIMIT_PER_MINUTE}/min, {RATE_LIMIT_PER_HOUR}/hour")
+    print(f"CSRF protection: {'enabled' if CSRF_ENABLED else 'disabled'}")
+    print(f"Health check available at: http://{HOST}:{PORT}/health")
+    
+    app.run(debug=DEBUG_MODE, host=HOST, port=PORT)

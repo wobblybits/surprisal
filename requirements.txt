@@ -7,3 +7,6 @@ wordfreq
 tiktoken
 protobuf
 blobfile
+Flask-Limiter
+Flask-WTF
+redis
