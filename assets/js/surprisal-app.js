@@ -203,7 +203,7 @@ export class SurprisalApp {
         
         // Schedule the note with relative timing
         const eventId = Tone.Transport.schedule((time) => {
-          this.state.toneOutput.volume.value = volumes[i] / this.audioSettings.volumeScaling;
+          this.state.toneOutput.volume.value = volumes[i] / this.audioSettings.volumeScaling ** 2;
           this.state.toneOutput.triggerAttackRelease(notes[i], durations[i], time);
         }, `+${delay}`); // Use relative timing format
         
