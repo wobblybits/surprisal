@@ -5,7 +5,7 @@
 **Live Demo**: https://surprisal.onrender.com  
 **API**: https://surprisal.onrender.com/process/
 
-An innovative web application that bridges linguistics and music by calculating text "surprisal" values using large language models and translating them into musical compositions. Built by [David Feil](https://github.com/wobblybits) and [Elise Kim](https://github.com/elisekim) during a batch at the [Recurse Center](https://www.recurse.com/).
+An innovative web application that bridges linguistics and music by calculating text "surprisal" values using large language models and translating them into musical compositions. Built by [David Feil](https://github.com/wobblybits) and [Elise Kim](https://github.com/eayhkim) during a batch at the [Recurse Center](https://www.recurse.com/).
 
 ![Surprisal Calculator Interface](./preview/interface.png)
 
