@@ -6,7 +6,6 @@ load_dotenv()
 
 class Config:
     """Base configuration."""
-    SECRET_KEY = os.getenv('FLASK_SECRET_KEY') or 'dev-key-not-for-production'
     MAX_TEXT_LENGTH = int(os.getenv('MAX_TEXT_LENGTH', 1000))
     
     # Rate Limiting - Default to memory for local development
@@ -14,8 +13,8 @@ class Config:
     RATE_LIMIT_PER_MINUTE = os.getenv('RATE_LIMIT_PER_MINUTE', '10')
     RATE_LIMIT_PER_HOUR = os.getenv('RATE_LIMIT_PER_HOUR', '100')
     
-    # Security
-    CSRF_ENABLED = os.getenv('CSRF_ENABLED', 'True').lower() == 'true'
+    # Security - Origin-based protection
+    ORIGIN_PROTECTION_ENABLED = os.getenv('ORIGIN_PROTECTION_ENABLED', 'True').lower() == 'true'
     
     # Flask settings - Use PORT env var for Render.com compatibility
     HOST = os.getenv('FLASK_HOST', '0.0.0.0')
@@ -32,7 +31,7 @@ class DevelopmentConfig(Config):
     
     # Force memory storage for development to avoid Redis dependency
     RATE_LIMIT_STORAGE_URL = 'memory://'
-    CSRF_ENABLED = False  # Disable CSRF for easier development
+    ORIGIN_PROTECTION_ENABLED = False  # Disable origin protection for easier development
     
     def __init__(self):
         super().__init__()
@@ -44,28 +43,60 @@ class DevelopmentConfig(Config):
         self.DISABLED_MODELS = []
         self.ENABLED_MODELS = [model for model in self.ENABLED_MODELS if model not in self.DISABLED_MODELS]
         
-        if self.SECRET_KEY == 'dev-key-not-for-production':
-            print("WARNING: Using default secret key. Set FLASK_SECRET_KEY in production!")
         print(f"Development mode: Rate limits set to {self.RATE_LIMIT_PER_MINUTE}/min, {self.RATE_LIMIT_PER_HOUR}/hour")
         print(f"Development mode: Enabled models: {self.ENABLED_MODELS}")
         print(f"Development mode: Disabled models: {self.DISABLED_MODELS}")
 
 class ProductionConfig(Config):
-    """Production configuration."""
+    """Production configuration - optimized for single-instance cloud deployment (Render)."""
     DEBUG = False
-    
-    # Production model configuration - disable larger models to save memory
-    DISABLED_MODELS = os.getenv('DISABLED_MODELS', 'smollm,nano mistral,qwen,flan').split(',')
     
     def __init__(self):
         super().__init__()
-        if not self.SECRET_KEY or self.SECRET_KEY == 'dev-key-not-for-production':
-            raise ValueError("FLASK_SECRET_KEY environment variable must be set in production")
         
-        # Filter out disabled models from enabled models
+        # Determine deployment type
+        deployment_type = os.getenv('DEPLOYMENT_TYPE', 'render').lower()
+        
+        if deployment_type == 'docker':
+            # Docker deployment - use Redis if available
+            self.RATE_LIMIT_STORAGE_URL = os.getenv('RATE_LIMIT_STORAGE_URL', 'redis://redis:6379')
+            self.RATE_LIMIT_PER_MINUTE = os.getenv('RATE_LIMIT_PER_MINUTE', '200')
+            self.RATE_LIMIT_PER_HOUR = os.getenv('RATE_LIMIT_PER_HOUR', '1000')
+            print(f"Docker deployment: Using Redis storage at {self.RATE_LIMIT_STORAGE_URL}")
+        else:
+            # Render/cloud deployment - use memory storage for single instance
+            self.RATE_LIMIT_STORAGE_URL = 'memory://'
+            self.RATE_LIMIT_PER_MINUTE = os.getenv('RATE_LIMIT_PER_MINUTE', '200')
+            self.RATE_LIMIT_PER_HOUR = os.getenv('RATE_LIMIT_PER_HOUR', '1000')
+            print("Cloud deployment: Using memory storage (single instance)")
+        
+        # Production model configuration - disable larger models to save memory
+        self.DISABLED_MODELS = os.getenv('DISABLED_MODELS', 'smollm,nano mistral,qwen,flan').split(',')
         self.ENABLED_MODELS = [model for model in self.ENABLED_MODELS if model not in self.DISABLED_MODELS]
-        print(f"Production mode: Enabled models: {self.ENABLED_MODELS}")
+
+        print(f"Production mode: Rate limits set to {self.RATE_LIMIT_PER_MINUTE}/min, {self.RATE_LIMIT_PER_HOUR}/hour")
+        print(f"Production mode: Storage type: {self.RATE_LIMIT_STORAGE_URL}")
         print(f"Production mode: Disabled models: {self.DISABLED_MODELS}")
+
+class DockerProductionConfig(Config):
+    """Docker-specific production configuration - uses Redis for multi-instance deployments."""
+    DEBUG = False
+    
+    def __init__(self):
+        super().__init__()
+        
+        # Force Redis for Docker deployments
+        self.RATE_LIMIT_STORAGE_URL = os.getenv('RATE_LIMIT_STORAGE_URL', 'redis://redis:6379')
+        self.RATE_LIMIT_PER_MINUTE = os.getenv('RATE_LIMIT_PER_MINUTE', '200')
+        self.RATE_LIMIT_PER_HOUR = os.getenv('RATE_LIMIT_PER_HOUR', '1000')
+        
+        # Production model configuration
+        self.DISABLED_MODELS = os.getenv('DISABLED_MODELS', 'smollm,nano mistral,qwen,flan').split(',')
+        self.ENABLED_MODELS = [model for model in self.ENABLED_MODELS if model not in self.DISABLED_MODELS]
+
+        print(f"Docker production: Rate limits set to {self.RATE_LIMIT_PER_MINUTE}/min, {self.RATE_LIMIT_PER_HOUR}/hour")
+        print(f"Docker production: Using Redis storage at {self.RATE_LIMIT_STORAGE_URL}")
+        print(f"Docker production: Disabled models: {self.DISABLED_MODELS}")
 
 class TestingConfig(Config):
     """Testing configuration."""
@@ -73,7 +104,7 @@ class TestingConfig(Config):
     DEBUG = True
     # Use memory storage for testing to avoid external dependencies
     RATE_LIMIT_STORAGE_URL = 'memory://'
-    CSRF_ENABLED = False
+    ORIGIN_PROTECTION_ENABLED = False
     
     def __init__(self):
         super().__init__()
@@ -85,6 +116,7 @@ class TestingConfig(Config):
 config = {
     'development': DevelopmentConfig,
     'production': ProductionConfig,
+    'docker': DockerProductionConfig,  # Explicit Docker configuration
     'testing': TestingConfig,
     'default': DevelopmentConfig
 }

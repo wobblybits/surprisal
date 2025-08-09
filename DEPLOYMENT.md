@@ -1,94 +1,89 @@
-# Deployment Guide for Render.com
+# Deployment Guide
 
-This guide explains how to deploy the Surprisal Calculator to Render.com with optimized memory usage.
+## Render.com Deployment (Recommended for Single Instance)
 
-## Environment Configuration
+Render.com provides a simple, single-instance deployment that's perfect for this application.
 
-### Required Environment Variables
+### Environment Configuration
 
 Set these in your Render.com service configuration:
 
 ```bash
+# Core settings
 FLASK_ENV=production
-FLASK_SECRET_KEY=your-randomly-generated-secret-key-here
+DEPLOYMENT_TYPE=render
 PORT=8001
 
 # Model Configuration for Memory Optimization
-ENABLED_MODELS=gpt2,distilgpt2
-DISABLED_MODELS=smollm,nano mistral,qwen,flan
+ENABLED_MODELS=flan
+DISABLED_MODELS=smollm,gpt2,distilgpt2,nano mistral,qwen
 
-# Rate Limiting (adjust as needed)
-RATE_LIMIT_PER_MINUTE=20
-RATE_LIMIT_PER_HOUR=500
-RATE_LIMIT_STORAGE_URL=memory://
+# Rate Limiting (memory-based, no Redis needed)
+RATE_LIMIT_PER_MINUTE=200
+RATE_LIMIT_PER_HOUR=1000
 
 # Security
-CSRF_ENABLED=True
+ORIGIN_PROTECTION_ENABLED=True
 MAX_TEXT_LENGTH=1000
 ```
 
-### Memory Optimization
-
-The production configuration disables larger models by default:
-- **Enabled**: `gpt2`, `distilgpt2` (lighter models)
-- **Disabled**: `smollm`, `nano mistral`, `qwen`, `flan` (heavier models)
-
-Disabled models will appear as grayed-out buttons in the UI with "unavailable in demo" message on hover.
-
-## Render.com Configuration
+**Key Benefits:**
+- ✅ No Redis dependency required
+- ✅ Memory-based rate limiting for single instance
+- ✅ Automatic restarts clear rate limit state
+- ✅ Simpler configuration
 
 ### Build & Deploy Settings
 
 1. **Build Command**: `pip install -r requirements.txt`
-2. **Start Command**: `gunicorn -c gunicorn.conf.py app:app`
-3. **Instance Type**: Choose based on your needs (Starter plan should work with optimized models)
+2. **Start Command**: `./start.sh`
+3. **Instance Type**: Starter plan works with optimized models
 
-### Auto-Deploy
+## Docker Deployment (For Multi-Instance or Complex Setups)
 
-Connect your GitHub repository and enable auto-deploy for automatic updates.
+Use Docker when you need:
+- Multiple app instances
+- Persistent rate limiting across restarts
+- More complex infrastructure
 
-## Health Check
-
-The application provides a health check endpoint at `/health` that includes:
-- Model loading status
-- Memory usage information
-- Configuration details
-- Uptime statistics
-
-## Customizing Model Selection
-
-To change which models are enabled/disabled, update the environment variables:
-
+### Production Docker
 ```bash
-# Enable all models (requires more memory)
-ENABLED_MODELS=gpt2,distilgpt2,smollm,nano mistral,qwen,flan
-DISABLED_MODELS=
-
-# Enable only the smallest models
-ENABLED_MODELS=gpt2,distilgpt2
-DISABLED_MODELS=smollm,nano mistral,qwen,flan
-
-# Custom selection
-ENABLED_MODELS=gpt2,smollm,flan
-DISABLED_MODELS=distilgpt2,nano mistral,qwen
+cd docker/
+export FLASK_ENV=docker
+export DEPLOYMENT_TYPE=docker
+./run-production.sh
 ```
 
-## Port Configuration
+### Development Docker
+```bash
+cd docker/
+./run-development.sh
+```
 
-The application automatically uses the `PORT` environment variable provided by Render.com. The gunicorn configuration handles this automatically.
+**Features:**
+- ✅ Redis-backed rate limiting
+- ✅ Persistent storage
+- ✅ Nginx reverse proxy
+- ✅ Multi-instance support
 
-## Troubleshooting
+## Rate Limiting Details
 
-### Memory Issues
-- Reduce the number of enabled models
-- Check the `/health` endpoint for memory usage
-- Consider upgrading your Render.com plan
+### Render (Memory-based)
+- **Storage**: Application memory
+- **Persistence**: Reset on app restart
+- **Limits**: 200/min, 1000/hour
+- **Scaling**: Single instance only
 
-### Model Loading Errors
-- Check the logs for specific model loading failures
-- Verify that only available models are enabled
-- Use the `/api/models` endpoint to check model availability
+### Docker (Redis-based)
+- **Storage**: Redis database
+- **Persistence**: Survives restarts
+- **Limits**: 200/min, 1000/hour  
+- **Scaling**: Multiple instances supported
 
-### Rate Limiting
-- Adjust `RATE_LIMIT_PER_MINUTE` and `RATE_LIMIT_PER_HOUR` as needed
-- Monitor usage through the health check endpoint 
+## Migration Guide
+
+### From Redis to Memory (Render)
+No migration needed - rate limits start fresh.
+
+### From Memory to Redis (Docker)
+Rate limits will reset when switching storage backends. 

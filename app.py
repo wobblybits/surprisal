@@ -9,7 +9,6 @@ import torch.nn.functional as F
 import math
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from flask_wtf.csrf import CSRFProtect
 import secrets
 import time
 from config import get_config
@@ -21,12 +20,41 @@ config = get_config()
 app = Flask(__name__)
 
 # Apply configuration to Flask app
-app.config['SECRET_KEY'] = config.SECRET_KEY
 app.config['DEBUG'] = config.DEBUG
 
-# CSRF Protection
-if config.CSRF_ENABLED:
-    csrf = CSRFProtect(app)
+# Origin-based protection for POST requests
+@app.before_request
+def check_origin():
+    """Check origin for POST requests to prevent unwanted cross-origin requests."""
+    if request.method == 'POST' and config.ORIGIN_PROTECTION_ENABLED:
+        origin = request.headers.get('Origin')
+        host = request.headers.get('Host')
+        
+        # Allow requests without Origin header (direct API calls, curl, etc.)
+        if not origin:
+            return None
+            
+        # Extract the origin host (remove protocol and port)
+        try:
+            origin_host = origin.split('//')[1].split(':')[0] if '//' in origin else origin.split(':')[0]
+            request_host = host.split(':')[0] if ':' in host else host
+            
+            # Allow same-origin requests
+            if origin_host == request_host:
+                return None
+                
+            # Block cross-origin requests
+            return jsonify({
+                'error': 'Cross-origin requests not allowed',
+                'message': 'This API only accepts same-origin requests'
+            }), 403
+            
+        except Exception as e:
+            # If we can't parse the origin, block it to be safe
+            return jsonify({
+                'error': 'Invalid origin header',
+                'message': 'Could not validate request origin'
+            }), 403
 
 # Rate Limiting Configuration - Only enable in production
 if config.DEBUG:
@@ -230,7 +258,7 @@ def health_check():
             "config": {
                 "max_text_length": config.MAX_TEXT_LENGTH,
                 "debug_mode": config.DEBUG,
-                "csrf_enabled": config.CSRF_ENABLED,
+                "origin_protection_enabled": config.ORIGIN_PROTECTION_ENABLED,
                 "flask_env": os.getenv('FLASK_ENV', 'default'),
                 "rate_limiting": {
                     "storage_url": config.RATE_LIMIT_STORAGE_URL,
@@ -512,24 +540,13 @@ def ratelimit_handler(e):
         "retry_after": getattr(e, 'retry_after', None)
     }), 429
 
-# CSRF error handler
-if config.CSRF_ENABLED:
-    @app.errorhandler(400)
-    def csrf_error(reason):
-        if 'csrf' in str(reason).lower():
-            return jsonify({
-                "error": "CSRF token missing or invalid",
-                "message": "Please include a valid CSRF token with your request"
-            }), 400
-        return jsonify({"error": "Bad request"}), 400
-
 
 if __name__ == "__main__":
     print(f"Starting Surprisal Calculator...")
     print(f"Environment: {os.getenv('FLASK_ENV', 'default')}")
     print(f"Debug mode: {config.DEBUG}")
     print(f"Rate limiting: {config.RATE_LIMIT_PER_MINUTE}/min, {config.RATE_LIMIT_PER_HOUR}/hour")
-    print(f"CSRF protection: {'enabled' if config.CSRF_ENABLED else 'disabled'}")
+    print(f"Origin protection: {'enabled' if config.ORIGIN_PROTECTION_ENABLED else 'disabled'}")
     print(f"Health check available at: http://{config.HOST}:{config.PORT}/health")
     print(f"Loaded models: {list(models.keys())}")
     print(f"Disabled models: {list(disabled_models)}")

@@ -16,9 +16,10 @@ RUN apt-get update \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy and install Docker-specific requirements
+COPY requirements.txt /app/
+COPY docker/requirements.docker.txt /app/docker/
+RUN pip install --no-cache-dir -r docker/requirements.docker.txt
 
 # Copy application code
 COPY . .

@@ -73,7 +73,7 @@ paths:
                       debug_mode:
                         type: boolean
                         example: false
-                      csrf_enabled:
+                      origin_protection_enabled:
                         type: boolean
                         example: true
         '503':
@@ -99,7 +99,9 @@ paths:
         Analyzes input text using the specified language model to calculate surprisal values 
         for each token, then returns data needed to generate musical composition.
       security:
-        - CSRFToken: []
+        - description: |
+            This API uses origin-based protection to prevent unwanted cross-origin requests.
+            Requests must be made from the same origin as the API server.
       parameters:
         - in: header
           name: X-RateLimit-Limit
@@ -192,7 +194,9 @@ paths:
         Given input text and a musical note (scale pitch), generates the next word 
         that has a surprisal value corresponding to the specified pitch.
       security:
-        - CSRFToken: []
+        - description: |
+            This API uses origin-based protection to prevent unwanted cross-origin requests.
+            Requests must be made from the same origin as the API server.
       requestBody:
         required: true
         content:

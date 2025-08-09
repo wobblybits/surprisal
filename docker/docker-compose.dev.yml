@@ -8,29 +8,28 @@ services:
     ports:
       - "8001:8001"
     environment:
-      - FLASK_DEBUG=True
+      - FLASK_ENV=development
+      - DEPLOYMENT_TYPE=docker
       - FLASK_HOST=0.0.0.0
       - FLASK_PORT=8001
       - MAX_TEXT_LENGTH=1000
-      - RATE_LIMIT_STORAGE_URL=redis://redis:6379
-      - RATE_LIMIT_PER_MINUTE=100
-      - RATE_LIMIT_PER_HOUR=1000
-      - CSRF_ENABLED=False
-      - FLASK_SECRET_KEY=dev-key-not-for-production
+      - RATE_LIMIT_STORAGE_URL=memory://
+      - RATE_LIMIT_PER_MINUTE=1000
+      - RATE_LIMIT_PER_HOUR=10000
+      - ORIGIN_PROTECTION_ENABLED=False
     volumes:
       - ..:/app
-    depends_on:
-      - redis
     restart: unless-stopped
     
-  redis:
-    image: redis:6-alpine
-    ports:
-      - "6379:6379"
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
+  # Remove Redis for development - not needed with memory storage
+  # redis:
+  #   image: redis:6-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   restart: unless-stopped
+  #   command: redis-server --appendonly yes
+  #   volumes:
+  #     - redis_data:/data
 
-volumes:
-  redis_data: 
+# volumes:
+#   redis_data: 
