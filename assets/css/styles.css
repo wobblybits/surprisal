@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Portfolio";
-  src: url("../assets/portfolio.woff") format("woff");
+  src: url("../fonts/portfolio.woff") format("woff");
 }
 
 body {
