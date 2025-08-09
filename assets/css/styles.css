@@ -80,7 +80,7 @@
   
   /* ===== LAYOUT & SPACING SYSTEM ===== */
   /* Main Layout Dimensions */
-  --container-height: 660px;          /* The famous line 41! */
+  --container-height: 90vh;          /* The famous line 41! */
   --container-min-width: 875px;
   --container-max-width: 1000px;
   --calculator-min-width: 485px;
@@ -89,7 +89,7 @@
   --panel-width: calc(50% - 2em);
   
   /* Component Heights */
-  --display-height: 33%;
+  --display-height: calc(90vh - 445px);
   --buttons-height: calc(66% - 6em);
   --keyboard-key-height: 6.5%;
   --keyboard-black-key-height: 6%;

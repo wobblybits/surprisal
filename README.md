@@ -7,7 +7,9 @@
 
 An innovative web application that bridges linguistics and music by calculating text "surprisal" values using large language models and translating them into musical compositions. Built by [David Feil](https://github.com/wobblybits) and [Elise Kim](https://github.com/elisekim) during a batch at the [Recurse Center](https://www.recurse.com/).
 
-![Surprisal Calculator Interface](https://via.placeholder.com/800x400?text=Surprisal+Calculator+Screenshot)
+![Surprisal Calculator Interface](./preview/interface.png)
+
+![Surprisal Calculator Demo](./preview/cat.mp4)
 
 ## 🎵 What is Surprisal?
 

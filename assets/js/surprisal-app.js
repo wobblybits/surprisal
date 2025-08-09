@@ -23,6 +23,7 @@ export class SurprisalApp {
       isPlaying: false,
       playbackTimeouts: [], // Track timeouts for cancellation
       scheduledEvents: [], // Track Tone.js scheduled events
+      keyHighlightTimeouts: {}, // Track key highlight timeouts by key ID
       
       updateSettings: (newSettings) => {
         this.state.currentSettings = newSettings;
@@ -615,6 +616,10 @@ export class SurprisalApp {
           try {
             const adjustedDuration = this.getSamplerAdjustedDuration(this.audioSettings.noteDuration);
             this.state.toneOutput.triggerAttackRelease(key.id, adjustedDuration, Tone.now());
+            
+            // Highlight key for minimum 500ms
+            this.highlightKey(key.id, 500);
+            
             const text = document.getElementById("user-input").value;
             this.fetchFromBackendReverse(text, scalePitch);
           } catch (error) {
@@ -671,10 +676,7 @@ export class SurprisalApp {
             // Fix: Get the scale pitch value, not the index
             const scalePitchValue = this.state.scales[this.state.currentScale][parseInt(lastKeyPress.key) - 1];
             this.fetchFromBackendReverse(text, scalePitchValue);
-            const keyElement = document.getElementById(this.convertSharpToFlat(lastKeyPress.note.toNote()));
-            if (keyElement) {
-              keyElement.classList.remove("highlight");
-            }
+            // Note: Don't immediately remove highlight here - let the timeout handle it
           }
           lastKeyPress.key = key;
           lastKeyPress.time = performance.now();
@@ -683,19 +685,17 @@ export class SurprisalApp {
           lastKeyPress.note = note;
           const adjustedDuration = this.getSamplerAdjustedDuration(this.audioSettings.noteDuration);
           this.state.toneOutput.triggerAttackRelease(note, adjustedDuration, Tone.now());
-          const keyElement = document.getElementById(this.convertSharpToFlat(lastKeyPress.note.toNote()));
-          if (keyElement) {
-            keyElement.classList.add("highlight");
-          }
+          
+          // Highlight key for minimum 500ms
+          const keyId = this.convertSharpToFlat(lastKeyPress.note.toNote());
+          this.highlightKey(keyId, 500);
+          
         } else if (action === 'up' && lastKeyPress.key === key) {
           const text = document.getElementById("user-input").value;
           // Fix: Get the scale pitch value, not the index
           const scalePitchValue = this.state.scales[this.state.currentScale][parseInt(key) - 1];
           this.fetchFromBackendReverse(text, scalePitchValue);
-          const keyElement = document.getElementById(this.convertSharpToFlat(lastKeyPress.note.toNote()));
-          if (keyElement) {
-            keyElement.classList.remove("highlight");
-          }
+          // Note: Don't immediately remove highlight here - let the timeout handle it
           lastKeyPress.key = null;
           lastKeyPress.time = null;
         }
@@ -805,6 +805,26 @@ export class SurprisalApp {
         ErrorHandler.showError(`Failed to load example: ${error.message}`);
       }
     });
+  }
+
+  // Add helper method for key highlighting with minimum duration
+  highlightKey(keyId, minDuration = 500) {
+    const keyElement = document.getElementById(keyId);
+    if (!keyElement) return;
+
+    // Clear any existing timeout for this key
+    if (this.state.keyHighlightTimeouts[keyId]) {
+      clearTimeout(this.state.keyHighlightTimeouts[keyId]);
+    }
+
+    // Add highlight immediately
+    keyElement.classList.add("highlight");
+
+    // Set timeout to remove highlight after minimum duration
+    this.state.keyHighlightTimeouts[keyId] = setTimeout(() => {
+      keyElement.classList.remove("highlight");
+      delete this.state.keyHighlightTimeouts[keyId];
+    }, minDuration);
   }
 
   // Main initialization method
