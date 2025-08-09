@@ -17,8 +17,8 @@ export RATE_LIMIT_PER_HOUR=${RATE_LIMIT_PER_HOUR:-1000}
 export ORIGIN_PROTECTION_ENABLED=${ORIGIN_PROTECTION_ENABLED:-True}
 
 # Model configuration for production (memory optimization)
-export ENABLED_MODELS=${ENABLED_MODELS:-flan,distilgpt2}
-export DISABLED_MODELS=${DISABLED_MODELS:-smollm,gpt2,nano mistral,qwen}
+export ENABLED_MODELS=${ENABLED_MODELS:-flan}
+export DISABLED_MODELS=${DISABLED_MODELS:-smollm,distilgpt2,gpt2,nano mistral,qwen}
 
 # Display configuration
 echo "Environment: $FLASK_ENV"
