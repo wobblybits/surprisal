@@ -287,6 +287,11 @@ strong {
   color: var(--color-primary);
 }
 
+#examples strong, #equation strong, #demo-wrapper strong {
+  background: var(--color-text-dark);
+  padding: 1px 2px;
+}
+
 #container {
   display: flex;
   flex-direction: row;
@@ -536,10 +541,44 @@ strong {
 #buttons > div > div#submit {
   background: var(--bg-button-submit);
   margin-bottom: var(--padding-md);
+  min-height: 3em; /* Fixed minimum height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* Prevent content from expanding outside */
 }
 
 #buttons > div > div#submit:hover {
   background: var(--bg-button-submit-hover);
+}
+
+/* Disabled button styles for models */
+#buttons > div#models > div.disabled {
+  background: #cccccc !important;
+  color: #666666 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+  border: var(--border-standard) solid #999999 !important;
+  position: relative;
+}
+
+#buttons > div#models > div.disabled:hover {
+  background: #cccccc !important;
+  border: var(--border-standard) solid #999999 !important;
+  color: #666666 !important;
+  cursor: not-allowed !important;
+}
+
+#buttons > div#models > div.disabled::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(128, 128, 128, 0.3);
+  pointer-events: none;
+  border-radius: var(--radius-lg);
 }
 
 #keyboard {
@@ -828,6 +867,7 @@ strong {
 /* Wiggling note animation for submit button */
 .wiggling-notes {
   display: inline-block;
+  line-height: 1; /* Prevent line height from affecting button height */
 }
 
 .wiggling-notes span {
@@ -835,6 +875,7 @@ strong {
   animation: wiggle 1s steps(2, end) infinite;
   margin: 0 2px;
   font-size: 1.2em; /* Make glyphs bigger */
+  line-height: 1; /* Prevent vertical expansion */
 }
 
 @keyframes wiggle {
@@ -862,6 +903,7 @@ strong {
 /* Stop text styling - minimal, inherits button styling */
 .stop-text {
   display: none;
+  line-height: 1; /* Consistent with wiggling notes */
 }
 
 /* Show/hide content on hover when animated */
@@ -994,12 +1036,10 @@ strong {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: var(--padding-example);
+  padding: var(--padding-sm);
   background: var(--bg-display);
   color: var(--color-text-dark) !important;
   text-decoration: none;
-  border: var(--border-raised);
-  border-radius: var(--radius-xxl);
   font-family: var(--font-display);
   font-size: 14px;
   font-weight: var(--font-weight-normal);
@@ -1011,9 +1051,8 @@ strong {
 }
 
 .github-repo-badge:hover {
-  background: var(--color-accent);
-  border: var(--border-hover);
-  color: var(--color-text-light) !important;
+  background: var(--color-text-dark);
+  color: var(--color-primary) !important;
 }
 
 .github-repo-badge:visited {

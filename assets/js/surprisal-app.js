@@ -203,7 +203,7 @@ export class SurprisalApp {
         
         // Schedule the note with relative timing
         const eventId = Tone.Transport.schedule((time) => {
-          this.state.toneOutput.volume.value = volumes[i] / this.audioSettings.volumeScaling;
+          this.state.toneOutput.volume.value = volumes[i] / this.audioSettings.volumeScaling ** 2;
           this.state.toneOutput.triggerAttackRelease(notes[i], durations[i], time);
         }, `+${delay}`); // Use relative timing format
         
@@ -453,6 +453,36 @@ export class SurprisalApp {
     }
   }
 
+  async fetchModelAvailability() {
+    console.log('Fetching model availability...');
+    try {
+      const response = await fetch('/api/models');
+      console.log('Response status:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Raw response data:', data);
+        
+        // Only update if we got valid data
+        if (data && typeof data === 'object') {
+          this.modelAvailability = {
+            available: data.available_models || [...this.models],
+            disabled: data.disabled_models || [],
+            all: data.all_models || [...this.models]
+          };
+          console.log('Updated model availability:', this.modelAvailability);
+        } else {
+          console.warn('Invalid data format received:', data);
+        }
+      } else {
+        console.warn('Failed to fetch model availability, status:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching model availability:', error);
+      // Keep the default values set in constructor
+    }
+  }
+
   // UI setup methods
   setupInstruments() {
     const instrumentContainer = document.getElementById("instruments");
@@ -553,32 +583,80 @@ export class SurprisalApp {
       return;
     }
 
+    // Enhanced debug logging
+    console.log('=== Model Setup Debug ===');
+    console.log('Model availability in setupModels:', this.modelAvailability);
+    console.log('Available models:', this.modelAvailability?.available);
+    console.log('Disabled models:', this.modelAvailability?.disabled);
+    console.log('All models from config:', this.models);
+
     for (const modelName of this.models) {
       try {
         const button = document.createElement("div");
         button.id = modelName;
         button.innerHTML = modelName;
-        button.onclick = async (event) => {
-          try {
-            ValidationUtils.validateModelSelection(modelName);
-            
-            const selectedModel = button.id;
-            this.state.currentSettings[this.appSettings.settingsIndices.model] = selectedModel.toUpperCase();
-            this.state.updateIndicator();
-            
-            // No API call needed - model is now sent with each request
-            AccessibilityUtils.announceToScreenReader(`Switched to ${selectedModel} model`);
-            
-          } catch (error) {
-            ErrorHandler.logError(error, 'model selection');
-            ErrorHandler.showError(`Failed to select model: ${error.message}`);
-          }
-        };
+        
+        // Safe check if model is disabled - handle undefined/null cases
+        const isDisabled = this.modelAvailability && 
+                          this.modelAvailability.disabled && 
+                          this.modelAvailability.disabled.includes(modelName);
+        
+        console.log(`Model ${modelName}: isDisabled = ${isDisabled}`);
+        
+        if (isDisabled) {
+          console.log(`Setting up ${modelName} as DISABLED`);
+          button.classList.add('disabled');
+          button.setAttribute('title', 'NOT IN DEMO');
+          button.setAttribute('aria-label', `${modelName} model - unavailable in demo`);
+          button.setAttribute('tabindex', '-1');
+          
+          // Add hover effect for disabled models
+          button.addEventListener('mouseenter', () => {
+            button.innerHTML = 'not in demo';
+          });
+          
+          button.addEventListener('mouseleave', () => {
+            button.innerHTML = modelName;
+          });
+          
+          // No click handler for disabled models
+        } else {
+          console.log(`Setting up ${modelName} as ENABLED`);
+          button.setAttribute('aria-label', `${modelName} model`);
+          button.setAttribute('tabindex', '0');
+          
+          button.onclick = async (event) => {
+            try {
+              ValidationUtils.validateModelSelection(modelName);
+              
+              const selectedModel = button.id;
+              this.state.currentSettings[this.appSettings.settingsIndices.model] = selectedModel.toUpperCase();
+              this.state.updateIndicator();
+              
+              // No API call needed - model is now sent with each request
+              AccessibilityUtils.announceToScreenReader(`Switched to ${selectedModel} model`);
+              
+            } catch (error) {
+              ErrorHandler.logError(error, 'model selection');
+              ErrorHandler.showError(`Failed to select model: ${error.message}`);
+            }
+          };
+          
+          // Add keyboard support for enabled models
+          button.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              button.click();
+            }
+          });
+        }
+        
         modelsContainer.appendChild(button);
       } catch (error) {
         ErrorHandler.logError(error, 'model creation');
       }
     }
+    console.log('=== End Model Setup Debug ===');
   }
 
   setupKeyboard() {
@@ -829,6 +907,9 @@ export class SurprisalApp {
 
   // Main initialization method
   async init() {
+    // Fetch model availability from backend FIRST
+    await this.fetchModelAvailability();
+    
     // Update text limits from backend first
     await ErrorHandler.updateTextLimit();
     

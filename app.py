@@ -58,44 +58,77 @@ app_start_time = time.time()
 
 counter = 0
 
-models = {
+# Define all possible models with their configurations
+ALL_MODELS = {
     "gpt2": {
-        "tokenizer": AutoTokenizer.from_pretrained("gpt2"),
-        "model": AutoModelForCausalLM.from_pretrained("gpt2"),
+        "tokenizer_path": "gpt2",
+        "model_path": "gpt2",
         "type": "causal",
         "whitespace": 'Ġ'
     },
     "distilgpt2": {
-        "tokenizer": AutoTokenizer.from_pretrained("distilbert/distilgpt2"),
-        "model": AutoModelForCausalLM.from_pretrained("distilbert/distilgpt2"),
+        "tokenizer_path": "distilbert/distilgpt2",
+        "model_path": "distilbert/distilgpt2",
         "type": "causal",
         "whitespace": 'Ġ'
     },
     "smollm": {
-        "tokenizer": AutoTokenizer.from_pretrained("HuggingFaceTB/SmolLM-135M"),
-        "model": AutoModelForCausalLM.from_pretrained("HuggingFaceTB/SmolLM-135M"),
+        "tokenizer_path": "HuggingFaceTB/SmolLM-135M",
+        "model_path": "HuggingFaceTB/SmolLM-135M",
         "type": "causal",
         "whitespace": 'Ġ'
     },
     "nano mistral": {
-        "tokenizer": AutoTokenizer.from_pretrained("crumb/nano-mistral"),
-        "model": AutoModelForCausalLM.from_pretrained("crumb/nano-mistral"),
+        "tokenizer_path": "crumb/nano-mistral",
+        "model_path": "crumb/nano-mistral",
         "type": "causal",
         "whitespace": ' '  # Regular space
     },
     "qwen": {
-        "tokenizer": AutoTokenizer.from_pretrained("KingNish/Qwen2.5-0.5b-Test-ft"),
-        "model": AutoModelForCausalLM.from_pretrained("KingNish/Qwen2.5-0.5b-Test-ft"),
+        "tokenizer_path": "KingNish/Qwen2.5-0.5b-Test-ft",
+        "model_path": "KingNish/Qwen2.5-0.5b-Test-ft",
         "type": "causal",
         "whitespace": 'Ġ'
     },
     "flan": {
-        "tokenizer": AutoTokenizer.from_pretrained("google/flan-t5-small"),
-        "model": AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-small"),
+        "tokenizer_path": "google/flan-t5-small",
+        "model_path": "google/flan-t5-small",
         "type": "seq2seq",
         "whitespace": ' '  # Regular space
     }
 }
+
+# Load only enabled models
+models = {}
+disabled_models = set(config.DISABLED_MODELS)
+
+print("Loading models...")
+for model_name, model_config in ALL_MODELS.items():
+    if model_name in disabled_models:
+        print(f"Skipping disabled model: {model_name}")
+        continue
+    
+    try:
+        print(f"Loading model: {model_name}")
+        tokenizer = AutoTokenizer.from_pretrained(model_config["tokenizer_path"])
+        
+        if model_config["type"] == "seq2seq":
+            model = AutoModelForSeq2SeqLM.from_pretrained(model_config["model_path"])
+        else:
+            model = AutoModelForCausalLM.from_pretrained(model_config["model_path"])
+        
+        models[model_name] = {
+            "tokenizer": tokenizer,
+            "model": model,
+            "type": model_config["type"],
+            "whitespace": model_config["whitespace"]
+        }
+        print(f"Successfully loaded: {model_name}")
+    except Exception as e:
+        print(f"Failed to load model {model_name}: {e}")
+
+print(f"Loaded {len(models)} models: {list(models.keys())}")
+print(f"Disabled models: {list(disabled_models)}")
 
 
 def process_tokens_for_display(tokens, whitespace_char):
@@ -139,12 +172,17 @@ def detect_whitespace_char(tokenizer, test_text="Hello world"):
     return None
 
 def validate_model_name(model_name):
-    """Validate that the model name is supported."""
+    """Validate that the model name is supported and available."""
     if not model_name:
         raise ValueError("Model name is required")
+    
+    if model_name in disabled_models:
+        raise ValueError(f"Model '{model_name}' is not available in this deployment")
+    
     if model_name not in models:
         available_models = list(models.keys())
         raise ValueError(f"Invalid model '{model_name}'. Available models: {available_models}")
+    
     return model_name
 
 def validate_text_input(text):
@@ -184,7 +222,11 @@ def health_check():
             "timestamp": time.time(),
             "uptime_seconds": uptime_seconds,
             "uptime_minutes": round(uptime_minutes, 2),
-            "models": model_status,
+            "models": {
+                "loaded": model_status,
+                "disabled": list(disabled_models),
+                "total_loaded": len(models)
+            },
             "config": {
                 "max_text_length": config.MAX_TEXT_LENGTH,
                 "debug_mode": config.DEBUG,
@@ -452,6 +494,15 @@ def debug_tokens(model_name):
         "whitespace_char": models[model_name]["whitespace"]
     })
 
+@app.route('/api/models', methods=['GET'])
+def get_model_info():
+    """Return information about available and disabled models."""
+    return jsonify({
+        "available_models": list(models.keys()),
+        "disabled_models": list(disabled_models),
+        "all_models": list(ALL_MODELS.keys())
+    })
+
 # Rate limit error handler
 @app.errorhandler(429)
 def ratelimit_handler(e):
@@ -480,5 +531,7 @@ if __name__ == "__main__":
     print(f"Rate limiting: {config.RATE_LIMIT_PER_MINUTE}/min, {config.RATE_LIMIT_PER_HOUR}/hour")
     print(f"CSRF protection: {'enabled' if config.CSRF_ENABLED else 'disabled'}")
     print(f"Health check available at: http://{config.HOST}:{config.PORT}/health")
+    print(f"Loaded models: {list(models.keys())}")
+    print(f"Disabled models: {list(disabled_models)}")
     
     app.run(debug=config.DEBUG, host=config.HOST, port=config.PORT)
