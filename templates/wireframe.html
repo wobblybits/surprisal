@@ -13,16 +13,27 @@
       window.onload = () => {
         const app = new SurprisalApp();
         app.init();
+        
+        // Make rotation overlay dismissible
+        const rotationOverlay = document.getElementById('rotation-overlay');
+        if (rotationOverlay) {
+          rotationOverlay.addEventListener('click', () => {
+            rotationOverlay.classList.add('hidden');
+          });
+        }
       };
     </script>
   </head>
   <body>
     <!-- NEW: Rotation overlay for portrait mobile -->
     <div id="rotation-overlay">
-      <div class="icon">📱</div>
+      <div class="icon-wrapper">
+        <img class="icon" src="../assets/images/sticker.png" alt="Rotate device">
+      </div>
       <h2>Rotate Device</h2>
       <p>This calculator works best in landscape orientation for optimal button size and visibility.</p>
       <small>You can still use it in portrait, but the experience will be better rotated.</small>
+      <small style="margin-top: 1rem; opacity: 0.6;">Tap anywhere to dismiss</small>
     </div>
     
     <!-- NEW: Viewport wrapper around container -->
@@ -82,7 +93,7 @@
 
         <p>The decision to translate surprisal numbers to musical pitches was not arbitrary. A good, informative sentence is made from a blend of predictability (low surprisal) and spontaneity (high surprisal); the same could also be said of a good melody. We quickly bore of a sentence made only of repetitive, predictable words ("he said that he thought that she said that they think that…"), we also quickly bore of a melody made of the same note, repeated over and over again. The delicate balancing act of predictability and spontaneity that plays out in both language and music seems to hint at a shared cognitive architecture used in both forms of expression.</p>
         <h1 id="how-to-use-the-surprisal-calculator-wm-72">How to use the
-        Surprisal Calculator WM 7±2</h1>
+        Surprisal Calculator</h1>
         <ul>
         <li><p>Type any sentence in, and press <code>compose</code> to hear its surprisal values.</p></li>
         <li><p>Use the calculator buttons to adjust instrument type, the LLM used to calculate probability scores, and the scale used to match surprisal numbers to pitches.</p></li>
@@ -107,6 +118,7 @@
         <p>Instrument icons by <a href="https://www.flaticon.com/authors/ains">Ains</a> and <a href="https://www.flaticon.com/authors/iconpack">IconPack</a> at <a href="https://www.flaticon.com/">Flaticon</a></p>
         <p>Sounds generated with <a href="https://tonejs.github.io/">Tone.js</a></p>
         <p>Cat <a href="https://pixabay.com/sound-effects/cat-meow-8-fx-306184/">sound effect</a> by <a href="https://buymeacoffee.com/bfcmusic">bfcmusic</a></p>
+        <p>Cat playing with knitting yarn adapted from <a href="https://www.flaticon.com/free-icons/cat-playing-with-knitting-yarn" title="cat playing with knitting yarn icons">icons</a> created by <a href="https://www.flaticon.com/authors/kerismaker">kerismaker</a> at  <a href="https://www.flaticon.com/">Flaticon</a></p>
     </div>
   </body>
 </html>

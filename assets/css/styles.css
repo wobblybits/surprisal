@@ -159,7 +159,6 @@
   --z-indicator: 9999999;
   
   /* ===== CONTENT WIDTHS ===== */
-  --content-width-explainer: 60%;
   --content-width-equation: 80%;
   --content-width-models: 80%;
   
@@ -204,9 +203,9 @@ body {
   transform-origin: center center;
 }
 
-/* NEW: Rotation overlay for portrait mobile */
+/* Rotation overlay for portrait mobile devices */
 #rotation-overlay {
-  display: none; /* Hidden by default */
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -223,17 +222,35 @@ body {
   gap: 1rem;
   padding: 2rem;
   box-sizing: border-box;
+  cursor: pointer;
+}
+
+#rotation-overlay.hidden {
+  display: none !important;
+}
+
+#rotation-overlay .icon-wrapper {
+  filter: drop-shadow(0px 36px 0px rgba(0, 0, 0, .3));
 }
 
 #rotation-overlay .icon {
-  font-size: 3rem;
+  width: 256px;
+  height: 256px;
   animation: rotate 2s ease-in-out infinite;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+#rotation-overlay:hover {
+  background: rgba(47, 79, 79, 0.98);
 }
 
 #rotation-overlay h2 {
   font-size: 1.5rem;
   margin: 0;
   color: var(--color-primary);
+  font-weight: 600;
 }
 
 #rotation-overlay p {
@@ -249,8 +266,8 @@ body {
 }
 
 @keyframes rotate {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(90deg); }
+  0%, 100% { transform: rotate(90deg); }
+  50%, 70% { transform: rotate(-45deg); }
 }
 
 h4 {
@@ -600,15 +617,20 @@ strong {
   border-top-color: transparent;
   font-family: var(--font-ui);
   color: var(--color-text-light);
-  max-width: var(--content-width-explainer);
+  max-width: var(--container-max-width);
   margin: auto;
   text-align: left;
   font-size: 1em;
+  padding: 0 var(--padding-lg);
 }
 
 #explainer h1 {
   font-family: var(--font-display);
   color: var(--color-text-light);
+}
+
+#explainer h1:first-of-type {
+  text-align: center;
 }
 
 #examples {
