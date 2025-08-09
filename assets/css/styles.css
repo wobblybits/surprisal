@@ -536,6 +536,11 @@ strong {
 #buttons > div > div#submit {
   background: var(--bg-button-submit);
   margin-bottom: var(--padding-md);
+  min-height: 3em; /* Fixed minimum height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* Prevent content from expanding outside */
 }
 
 #buttons > div > div#submit:hover {
@@ -828,6 +833,7 @@ strong {
 /* Wiggling note animation for submit button */
 .wiggling-notes {
   display: inline-block;
+  line-height: 1; /* Prevent line height from affecting button height */
 }
 
 .wiggling-notes span {
@@ -835,6 +841,7 @@ strong {
   animation: wiggle 1s steps(2, end) infinite;
   margin: 0 2px;
   font-size: 1.2em; /* Make glyphs bigger */
+  line-height: 1; /* Prevent vertical expansion */
 }
 
 @keyframes wiggle {
@@ -862,6 +869,7 @@ strong {
 /* Stop text styling - minimal, inherits button styling */
 .stop-text {
   display: none;
+  line-height: 1; /* Consistent with wiggling notes */
 }
 
 /* Show/hide content on hover when animated */
