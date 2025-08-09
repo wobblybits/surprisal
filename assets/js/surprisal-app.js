@@ -72,6 +72,17 @@ export class SurprisalApp {
     Tone.Transport.start(this.audioSettings.transportStart);
   }
 
+  // Add helper method for sampler duration adjustment
+  getSamplerAdjustedDuration(duration) {
+    if (this.state.toneOutput === this.sampler) {
+      // For sampler instruments, ensure minimum duration
+      const durationInSeconds = typeof duration === 'string' ? 
+        Tone.Time(duration).toSeconds() : duration;
+      return Math.max(durationInSeconds, this.audioSettings.samplerMinDuration);
+    }
+    return duration;
+  }
+
   async playMelody(data) {
     try {
       await Tone.start();
@@ -107,6 +118,10 @@ export class SurprisalApp {
         const startPos = startIndex;
         const endPos = endIndex;
         durations[i] /= this.audioSettings.volumeScaling;
+        
+        // Apply sampler duration adjustment
+        durations[i] = this.getSamplerAdjustedDuration(durations[i]);
+        
         this.state.toneOutput.volume.value = volumes[i] / this.audioSettings.volumeScaling;
         
         this.state.toneOutput.triggerAttackRelease(notes[i], durations[i], delay);  
@@ -492,7 +507,8 @@ export class SurprisalApp {
         }
         key.onclick = (event) => {
           try {
-            this.state.toneOutput.triggerAttackRelease(key.id, this.audioSettings.noteDuration, Tone.now());
+            const adjustedDuration = this.getSamplerAdjustedDuration(this.audioSettings.noteDuration);
+            this.state.toneOutput.triggerAttackRelease(key.id, adjustedDuration, Tone.now());
             const text = document.getElementById("user-input").value;
             this.fetchFromBackendReverse(text, scalePitch);
           } catch (error) {
@@ -553,7 +569,8 @@ export class SurprisalApp {
           const pitch = this.convertToScale([(parseInt(key) - 1) * this.audioSettings.surprisalDivisor]);
           const note = Tone.Frequency(this.audioSettings.baseNote).transpose(pitch);
           lastKeyPress.note = note;
-          this.state.toneOutput.triggerAttackRelease(note, this.audioSettings.noteDuration, Tone.now());
+          const adjustedDuration = this.getSamplerAdjustedDuration(this.audioSettings.noteDuration);
+          this.state.toneOutput.triggerAttackRelease(note, adjustedDuration, Tone.now());
           const keyElement = document.getElementById(this.convertSharpToFlat(lastKeyPress.note.toNote()));
           if (keyElement) {
             keyElement.classList.add("highlight");

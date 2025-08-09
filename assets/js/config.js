@@ -126,6 +126,7 @@ export const audioSettings = {
   defaultVolume: 0.5,
   transportStart: 0,
   noteDuration: "8n",
+  samplerMinDuration: 1, // Minimum duration for sampler instruments in seconds
   continuousPitch: {
     baseNote: 48,
     referenceNote: 69,
