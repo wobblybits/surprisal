@@ -1,0 +1,34 @@
+# Minimal production image for faster builds
+FROM python:3.9-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV FLASK_APP=app.py
+
+WORKDIR /app
+
+# Only install required system dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy and install Python dependencies first (for better caching)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Create non-root user
+RUN adduser --disabled-password --gecos '' appuser \
+    && chown -R appuser:appuser /app
+USER appuser
+
+EXPOSE 8001
+
+# Simpler health check for minimal image
+HEALTHCHECK --interval=60s --timeout=5s --start-period=30s \
+    CMD curl -f http://localhost:8001/health || exit 1
+
+CMD ["gunicorn", "--bind", "0.0.0.0:8001", "--workers", "1", "--timeout", "60", "app:app"] 

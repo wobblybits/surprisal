@@ -18,7 +18,9 @@ An innovative web application that bridges linguistics and music by calculating 
 
 The word "cat" is far more surprising in the legal context! This "surprisingness" can be quantified using Claude Shannon's information theory formula:
 
-```Surprisal(x) = -log₂ P(x | context)```
+```
+Surprisal(x) = -log₂ P(x | context)
+```
 
 ## 🎹 How It Works
 
@@ -46,38 +48,39 @@ The application uses multiple language models (GPT-2, SmolLM, Qwen, etc.) to cal
 
 ### Prerequisites
 - Python 3.8+
-- Node.js (for development tools, optional)
+- Docker (optional, for containerized deployment)
 - Redis (optional, falls back to memory-based rate limiting)
 
-### Development Setup
+### Option 1: Local Development
 
 ```bash
-# Clone the repository
+# Clone and setup
 git clone https://github.com/wobblybits/surprisal.git
 cd surprisal
-
-# Run setup script
-chmod +x setup-dev.sh
 ./setup-dev.sh
 
 # Start development server
 ./run-dev.sh
 ```
 
-Visit http://localhost:8001 to use the application.
-
-### Docker Setup (Recommended for Production)
+### Option 2: Docker Development
 
 ```bash
-# Start all services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f app
-
-# Stop services
-docker-compose down
+# Clone and start with Docker
+git clone https://github.com/wobblybits/surprisal.git
+cd surprisal/docker
+./run-development.sh
 ```
+
+### Option 3: Production Deployment
+
+```bash
+# Production deployment with Docker
+cd docker/
+./run-production.sh
+```
+
+Visit http://localhost:8001 (local/dev) or http://localhost (production) to use the application.
 
 ## 🛠️ Configuration
 
@@ -127,6 +130,32 @@ curl -X POST http://localhost:8001/reverse/ \
 
 **Full API Documentation**: Open `api-docs.yaml` in [Swagger Editor](https://editor.swagger.io/) for interactive documentation.
 
+## 🐳 Docker Deployment
+
+All Docker-related files are organized in the `docker/` directory:
+
+### Development
+```bash
+cd docker/
+./run-development.sh
+```
+- Hot reload enabled
+- Debug mode on
+- Relaxed rate limits
+- Direct Redis access
+
+### Production  
+```bash
+cd docker/
+./run-production.sh
+```
+- Nginx reverse proxy
+- Rate limiting and caching
+- Security headers
+- Persistent storage
+
+See [`docker/README.md`](docker/README.md) for detailed Docker documentation.
+
 ## 🏗️ Architecture
 
 ### Backend (Python/Flask)
@@ -141,18 +170,27 @@ curl -X POST http://localhost:8001/reverse/ \
 - **Real-time UI**: Dynamic keyboard highlighting, visual feedback
 - **Accessibility**: Screen reader support, keyboard navigation
 
-### Key Files
-
-├── app.py # Main Flask application
+### Repository Structure
+```
+├── app.py                     # Main Flask application
 ├── assets/js/
-│ ├── config.js # Configuration and presets
-│ ├── surprisal-app.js # Main application logic
-│ └── utilities.js # Helper functions and error handling
-├── templates/wireframe.html # Main UI template
-├── requirements.txt # Python dependencies
-├── Dockerfile # Container configuration
-└── docker-compose.yml # Multi-service setup
-
+│   ├── config.js             # Configuration and presets
+│   ├── surprisal-app.js      # Main application logic
+│   └── utilities.js          # Helper functions and error handling
+├── templates/wireframe.html   # Main UI template
+├── requirements.txt          # Python dependencies
+├── api-docs.yaml            # OpenAPI specification
+├── docker/                  # Docker deployment files
+│   ├── Dockerfile           # Production container
+│   ├── Dockerfile.minimal
+│   ├── docker-compose.yml
+│   ├── docker-compose.dev.yml
+│   ├── nginx.conf
+│   ├── run-production.sh
+│   ├── run-development.sh
+│   └── README.md
+└── .env.example
+```
 
 ## 🎼 Musical Features
 
@@ -189,16 +227,23 @@ Each model has different tokenization and surprisal characteristics, leading to 
 # Activate virtual environment
 source venv/bin/activate
 
-# Install dependencies
-pip install -r requirements.txt
-
 # Start development server
 python app.py
 ```
 
+### Docker Development
+```bash
+# Start development environment
+cd docker/
+docker-compose -f docker-compose.dev.yml up -d
+
+# View logs
+docker-compose -f docker-compose.dev.yml logs -f
+```
+
 ### Testing
 ```bash
-# Run health check
+# Health check
 curl http://localhost:8001/health
 
 # Test text processing
@@ -206,31 +251,6 @@ curl -X POST http://localhost:8001/process/ \
   -H "Content-Type: application/json" \
   -d '{"text": "Hello world", "model": "gpt2"}'
 ```
-
-### Adding New Models
-1. Add model configuration to `app.py`
-2. Update frontend model list in `assets/js/config.js`
-3. Test tokenization with `/debug_tokens/{model}` endpoint
-
-## 🌐 Deployment
-
-### Production Deployment with Docker
-```bash
-# Build and start
-docker-compose -f docker-compose.yml up -d
-
-# Scale application
-docker-compose up --scale app=3
-
-# Monitor logs
-docker-compose logs -f
-```
-
-### Environment Setup
-- Set `FLASK_SECRET_KEY` to a secure random value
-- Configure Redis for rate limiting
-- Set appropriate rate limits for your use case
-- Enable CSRF protection
 
 ## 📊 Monitoring
 
@@ -259,4 +279,8 @@ docker-compose logs -f
 
 ## 📄 License
 
-This project is open source. Built with ❤️ at the [Recurse Center](https://recurse.com/).
+This project is open source. Built with ❤️ at the Recurse Center.
+
+---
+
+**Questions or feedback?** This project represents a unique intersection of linguistics, music theory, and web development. While considered complete, we welcome discussion about the concepts and implementation!
