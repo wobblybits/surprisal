@@ -825,3 +825,51 @@ strong {
   }
 }
 
+/* Wiggling note animation for submit button */
+.wiggling-notes {
+  display: inline-block;
+}
+
+.wiggling-notes span {
+  display: inline-block;
+  animation: wiggle 1s steps(2, end) infinite;
+  margin: 0 2px;
+  font-size: 1.2em; /* Make glyphs bigger */
+}
+
+@keyframes wiggle {
+  0%, 100% { 
+    transform: translate(0px, 0px); 
+  }
+  25% { 
+    transform: translate(-2px, -3px); 
+  }
+  50% { 
+    transform: translate(0px, -5px); 
+  }
+  75% { 
+    transform: translate(2px, -3px); 
+  }
+}
+
+/* Individual note animation delays for staggered effect */
+.wiggling-notes span:nth-child(1) { animation-delay: 0ms; }
+.wiggling-notes span:nth-child(2) { animation-delay: 150ms; }
+.wiggling-notes span:nth-child(3) { animation-delay: 300ms; }
+.wiggling-notes span:nth-child(4) { animation-delay: 450ms; }
+.wiggling-notes span:nth-child(5) { animation-delay: 600ms; }
+
+/* Stop text styling - minimal, inherits button styling */
+.stop-text {
+  display: none;
+}
+
+/* Show/hide content on hover when animated */
+#buttons > div > div#submit.animated:hover .wiggling-notes {
+  display: none;
+}
+
+#buttons > div > div#submit.animated:hover .stop-text {
+  display: inline;
+}
+

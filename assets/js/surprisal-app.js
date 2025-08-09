@@ -22,6 +22,7 @@ export class SurprisalApp {
       isLoading: false,
       isPlaying: false,
       playbackTimeouts: [], // Track timeouts for cancellation
+      scheduledEvents: [], // Track Tone.js scheduled events
       
       updateSettings: (newSettings) => {
         this.state.currentSettings = newSettings;
@@ -53,10 +54,20 @@ export class SurprisalApp {
 
       setLoading: (loading) => {
         this.state.isLoading = loading;
-        if (loading) {
-          UIUtils.showLoading();
-        } else {
-          UIUtils.hideLoading();
+        this.state.updateSubmitButton();
+      },
+      
+      updateSubmitButton: () => {
+        const submitButton = document.getElementById('submit');
+        if (submitButton) {
+          if (this.state.isLoading || this.state.isPlaying) {
+            // Create individual spans for each note to enable separate animation
+            submitButton.innerHTML = '<span class="wiggling-notes"><span>♪</span><span>♫</span><span>♪</span><span>♫</span><span>♪</span></span><span class="stop-text">STOP</span>';
+            submitButton.classList.add('animated');
+          } else {
+            submitButton.innerHTML = 'Compose ♫';
+            submitButton.classList.remove('animated');
+          }
         }
       }
     };
@@ -95,10 +106,23 @@ export class SurprisalApp {
         });
         this.state.playbackTimeouts = [];
         
-        // Stop all playing sounds
+        // Cancel all scheduled Tone.js events
+        this.state.scheduledEvents.forEach(eventId => {
+          Tone.Transport.clear(eventId);
+        });
+        this.state.scheduledEvents = [];
+        
+        // Stop all playing sounds and cancel all scheduled Tone.js events
         if (this.state.toneOutput) {
           this.state.toneOutput.triggerRelease();
         }
+        
+        // Cancel all scheduled Tone.js events
+        Tone.Transport.cancel();
+        
+        // Stop and restart the transport to clear any remaining events
+        Tone.Transport.stop();
+        Tone.Transport.start();
         
         // Clear any highlighted keys
         document.querySelectorAll('#keyboard .highlight').forEach(key => {
@@ -116,11 +140,13 @@ export class SurprisalApp {
         }
         
         this.state.isPlaying = false;
+        this.state.updateSubmitButton();
         AccessibilityUtils.announceToScreenReader('Melody stopped');
       }
     } catch (error) {
       ErrorHandler.logError(error, 'stopMelody');
       this.state.isPlaying = false;
+      this.state.updateSubmitButton();
     }
   }
 
@@ -128,7 +154,9 @@ export class SurprisalApp {
     try {
       await Tone.start();
       this.state.isPlaying = true;
+      this.state.updateSubmitButton();
       this.state.playbackTimeouts = []; // Reset timeouts array
+      this.state.scheduledEvents = []; // Reset scheduled events array
       
       const surprisals = data.surprisals;
       let pitches = [];
@@ -144,8 +172,8 @@ export class SurprisalApp {
       
       const durations = data.lengths;
       const volumes = data.frequencies_inverted;
-      let delay = Tone.now();
-      const offset = delay;
+      let delay = 0; // Start from 0 for relative timing
+      const startTime = Tone.now(); // Store absolute start time for timeouts
       const timeouts = [];
 
       const userInput = document.getElementById('user-input');
@@ -157,6 +185,11 @@ export class SurprisalApp {
       let endIndex = 0;
       let totalDuration = 0;
 
+      // Ensure Transport is running
+      if (Tone.Transport.state !== 'started') {
+        Tone.Transport.start();
+      }
+
       for (let i = 0; i < surprisals.length; i++) {
         timeouts.push(delay);
         endIndex = startIndex + durations[i];
@@ -167,9 +200,13 @@ export class SurprisalApp {
         // Apply sampler duration adjustment
         durations[i] = this.getSamplerAdjustedDuration(durations[i]);
         
-        this.state.toneOutput.volume.value = volumes[i] / this.audioSettings.volumeScaling;
+        // Schedule the note with relative timing
+        const eventId = Tone.Transport.schedule((time) => {
+          this.state.toneOutput.volume.value = volumes[i] / this.audioSettings.volumeScaling;
+          this.state.toneOutput.triggerAttackRelease(notes[i], durations[i], time);
+        }, `+${delay}`); // Use relative timing format
         
-        this.state.toneOutput.triggerAttackRelease(notes[i], durations[i], delay);  
+        this.state.scheduledEvents.push(eventId);
         
         const highlightTimeoutId = window.setTimeout(() => {
           try {
@@ -199,12 +236,12 @@ export class SurprisalApp {
           } catch (error) {
             ErrorHandler.logError(error, 'playMelody highlight');
           }
-        }, (Tone.Time(timeouts[i]).toSeconds() - offset) * this.audioSettings.playback.timeoutConversionMs);
+        }, (delay * 1000)); // Convert to milliseconds for setTimeout
         
         // Track highlight timeout
         this.state.playbackTimeouts.push(highlightTimeoutId);
         
-        delay += durations[i];
+        delay += Tone.Time(durations[i]).toSeconds(); // Add duration in seconds
         startIndex = endIndex;
         totalDuration = delay;
       }
@@ -213,13 +250,17 @@ export class SurprisalApp {
       const finishTimeoutId = window.setTimeout(() => {
         this.state.isPlaying = false;
         this.state.playbackTimeouts = [];
-      }, (Tone.Time(totalDuration).toSeconds() - offset) * this.audioSettings.playback.timeoutConversionMs);
+        this.state.scheduledEvents = [];
+        this.state.updateSubmitButton();
+      }, totalDuration * 1000); // Convert to milliseconds
       
       this.state.playbackTimeouts.push(finishTimeoutId);
       
     } catch (error) {
       this.state.isPlaying = false;
       this.state.playbackTimeouts = [];
+      this.state.scheduledEvents = [];
+      this.state.updateSubmitButton();
       ErrorHandler.logError(error, 'playMelody');
       ErrorHandler.showError(`Failed to play melody: ${error.message}`);
     }
