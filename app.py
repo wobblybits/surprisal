@@ -382,7 +382,7 @@ def music_to_text():
         best_surprisal = surprisals[best_token_id].item()
         
         # Calculate what pitch this token would actually produce
-        actual_pitch = int(best_surprisal/2)
+        actual_pitch = round(best_surprisal/2)
         
         # Get top 5 candidates for variety
         candidates = []
@@ -391,7 +391,7 @@ def music_to_text():
             token_raw = current_tokenizer.convert_ids_to_tokens([token_id])[0]
             token = process_tokens_for_display([token_raw], models[validated_model]["whitespace"])[0]
             token_surprisal = surprisals[token_id].item()
-            token_pitch = int(token_surprisal/2)
+            token_pitch = round(token_surprisal/2)
             candidates.append({
                 "token": token,
                 "surprisal": token_surprisal,

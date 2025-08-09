@@ -38,8 +38,7 @@ strong {
   max-width: 1000px;
   margin: auto;
   position: relative;
-  min-height: 100%;
-  height: calc(100% - 4em);
+  height: 660px;
 }
 
 #calculator {
@@ -53,6 +52,7 @@ strong {
   height: calc(100% - 3px);
   border-radius: 3px;
   overflow: auto;
+  min-width: 485px;
 }
 
 #title {
