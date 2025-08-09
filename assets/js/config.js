@@ -99,7 +99,7 @@ export const scaleIntervals = {
 
 export const notes = ["A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab"];
  
-export const models = ["gpt2", "smollm", "nano mistral", "qwen", "flan"];
+export const models = ["gpt2", "distilgpt2", "smollm", "nano mistral", "qwen", "flan"];
 
 // Application Settings - Core app behavior and limits
 export const applicationSettings = {

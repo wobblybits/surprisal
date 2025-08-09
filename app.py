@@ -65,6 +65,12 @@ models = {
         "type": "causal",
         "whitespace": 'Ġ'
     },
+    "distilgpt2": {
+        "tokenizer": AutoTokenizer.from_pretrained("distilbert/distilgpt2"),
+        "model": AutoModelForCausalLM.from_pretrained("distilbert/distilgpt2"),
+        "type": "causal",
+        "whitespace": 'Ġ'
+    },
     "smollm": {
         "tokenizer": AutoTokenizer.from_pretrained("HuggingFaceTB/SmolLM-135M"),
         "model": AutoModelForCausalLM.from_pretrained("HuggingFaceTB/SmolLM-135M"),
