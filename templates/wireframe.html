@@ -1,5 +1,6 @@
 <html>
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Coiny&family=Fredoka:wght@300..700&family=Major+Mono+Display&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Offside&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
@@ -16,24 +17,36 @@
     </script>
   </head>
   <body>
-    <div id="container">
-      <div id="calculator">
-        <div id="title">WM7<span style="font-size: .8em; font-family: portfolio">±</span>2</div>
-        <div id="display">
-          <div id="indicator"></div> 
-          <textarea id="user-input" placeholder="Enter text here..."></textarea>
-        </div>
-        <div id="buttons">
-          <div id="scales"></div>
-          <div id="models"></div>
-          <div id="instruments"></div>
-          <div id="translate">
-            <div id="submit">Compose ♫</div>
+    <!-- NEW: Rotation overlay for portrait mobile -->
+    <div id="rotation-overlay">
+      <div class="icon">📱</div>
+      <h2>Rotate Device</h2>
+      <p>This calculator works best in landscape orientation for optimal button size and visibility.</p>
+      <small>You can still use it in portrait, but the experience will be better rotated.</small>
+    </div>
+    
+    <!-- NEW: Viewport wrapper around container -->
+    <div id="viewport">
+      <div id="container">
+        <div id="calculator">
+          <div id="title">WM7<span style="font-size: .8em; font-family: portfolio">±</span>2</div>
+          <div id="display">
+            <div id="indicator"></div> 
+            <textarea id="user-input" placeholder="Enter text here..."></textarea>
+          </div>
+          <div id="buttons">
+            <div id="scales"></div>
+            <div id="models"></div>
+            <div id="instruments"></div>
+            <div id="translate">
+              <div id="submit">Compose ♫</div>
+            </div>
           </div>
         </div>
+        <div id="keyboard"></div>
       </div>
-      <div id="keyboard"></div>
     </div>
+    
     <div id="explainer">
       <h1 id="heading">
         The Surprisal Calculator WM7±2
@@ -90,7 +103,7 @@
         <p><a href="https://huggingface.co/KingNish/Qwen2.5-0.5b-Test-ft">Qwen 2.5</a>: A compact yet powerful language model (494M parameters) trained on a subset of the Magpie 300k Database to answer a variety of questions</p>
         <p><a href="https://huggingface.co/google/flan-t5-small">Flan T5</a>: Google's super small (74M parameters)version of the Text-To-Text Transfer Transformer (T5) model, fine-tuned on more than 1000 additional tasks (and more languages!).</p>
         <p>Calculator display font is <a href="https://int10h.org/oldschool-pc-fonts/fontlist/font?portfolio_6x8#-">Portfolio 6x8</a> from the <a href="https://int10h.org/oldschool-pc-fonts/">Old School PC Fonts project</a></p>
-        <p>Calculator button font is <a href="https://fonts.google.com/specimen/Fredoka">Fredoka</a> by <a href="https://milenabdesign.com/">Milena Brandão</a></p>
+        <p>Calculator button font is <a href="https://fonts.google.com/specimen/Fredoka">Fredoka</a> by <a href="https://milenabrandão.com/">Milena Brandão</a></p>
         <p>Instrument icons by <a href="https://www.flaticon.com/authors/ains">Ains</a> and <a href="https://www.flaticon.com/authors/iconpack">IconPack</a> at <a href="https://www.flaticon.com/">Flaticon</a></p>
         <p>Sounds generated with <a href="https://tonejs.github.io/">Tone.js</a></p>
         <p>Cat <a href="https://pixabay.com/sound-effects/cat-meow-8-fx-306184/">sound effect</a> by <a href="https://buymeacoffee.com/bfcmusic">bfcmusic</a></p>
