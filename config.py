@@ -41,7 +41,7 @@ class DevelopmentConfig(Config):
         self.RATE_LIMIT_PER_HOUR = '10000'   # 10000/hour for dev
         
         # Disable qwen model in development
-        self.DISABLED_MODELS = ['qwen']
+        self.DISABLED_MODELS = []
         self.ENABLED_MODELS = [model for model in self.ENABLED_MODELS if model not in self.DISABLED_MODELS]
         
         if self.SECRET_KEY == 'dev-key-not-for-production':

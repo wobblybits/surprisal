@@ -454,10 +454,15 @@ export class SurprisalApp {
   }
 
   async fetchModelAvailability() {
+    console.log('Fetching model availability...');
     try {
       const response = await fetch('/api/models');
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('Raw response data:', data);
+        
         // Only update if we got valid data
         if (data && typeof data === 'object') {
           this.modelAvailability = {
@@ -465,13 +470,15 @@ export class SurprisalApp {
             disabled: data.disabled_models || [],
             all: data.all_models || [...this.models]
           };
-          console.log('Model availability:', this.modelAvailability);
+          console.log('Updated model availability:', this.modelAvailability);
+        } else {
+          console.warn('Invalid data format received:', data);
         }
       } else {
-        console.warn('Failed to fetch model availability, using default configuration');
+        console.warn('Failed to fetch model availability, status:', response.status);
       }
     } catch (error) {
-      console.warn('Error fetching model availability:', error);
+      console.error('Error fetching model availability:', error);
       // Keep the default values set in constructor
     }
   }
@@ -576,8 +583,12 @@ export class SurprisalApp {
       return;
     }
 
-    // Debug logging
+    // Enhanced debug logging
+    console.log('=== Model Setup Debug ===');
     console.log('Model availability in setupModels:', this.modelAvailability);
+    console.log('Available models:', this.modelAvailability?.available);
+    console.log('Disabled models:', this.modelAvailability?.disabled);
+    console.log('All models from config:', this.models);
 
     for (const modelName of this.models) {
       try {
@@ -590,15 +601,18 @@ export class SurprisalApp {
                           this.modelAvailability.disabled && 
                           this.modelAvailability.disabled.includes(modelName);
         
+        console.log(`Model ${modelName}: isDisabled = ${isDisabled}`);
+        
         if (isDisabled) {
+          console.log(`Setting up ${modelName} as DISABLED`);
           button.classList.add('disabled');
-          button.setAttribute('title', 'Unavailable in demo');
+          button.setAttribute('title', 'NOT IN DEMO');
           button.setAttribute('aria-label', `${modelName} model - unavailable in demo`);
           button.setAttribute('tabindex', '-1');
           
           // Add hover effect for disabled models
           button.addEventListener('mouseenter', () => {
-            button.innerHTML = 'unavailable in demo';
+            button.innerHTML = 'not in demo';
           });
           
           button.addEventListener('mouseleave', () => {
@@ -607,6 +621,7 @@ export class SurprisalApp {
           
           // No click handler for disabled models
         } else {
+          console.log(`Setting up ${modelName} as ENABLED`);
           button.setAttribute('aria-label', `${modelName} model`);
           button.setAttribute('tabindex', '0');
           
@@ -641,6 +656,7 @@ export class SurprisalApp {
         ErrorHandler.logError(error, 'model creation');
       }
     }
+    console.log('=== End Model Setup Debug ===');
   }
 
   setupKeyboard() {
@@ -891,6 +907,9 @@ export class SurprisalApp {
 
   // Main initialization method
   async init() {
+    // Fetch model availability from backend FIRST
+    await this.fetchModelAvailability();
+    
     // Update text limits from backend first
     await ErrorHandler.updateTextLimit();
     

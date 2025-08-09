@@ -287,6 +287,11 @@ strong {
   color: var(--color-primary);
 }
 
+#examples strong, #equation strong, #demo-wrapper strong {
+  background: var(--color-text-dark);
+  padding: 1px 2px;
+}
+
 #container {
   display: flex;
   flex-direction: row;
@@ -1031,12 +1036,10 @@ strong {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: var(--padding-example);
+  padding: var(--padding-sm);
   background: var(--bg-display);
   color: var(--color-text-dark) !important;
   text-decoration: none;
-  border: var(--border-raised);
-  border-radius: var(--radius-xxl);
   font-family: var(--font-display);
   font-size: 14px;
   font-weight: var(--font-weight-normal);
@@ -1048,9 +1051,8 @@ strong {
 }
 
 .github-repo-badge:hover {
-  background: var(--color-accent);
-  border: var(--border-hover);
-  color: var(--color-text-light) !important;
+  background: var(--color-text-dark);
+  color: var(--color-primary) !important;
 }
 
 .github-repo-badge:visited {
