@@ -39,6 +39,10 @@ export class SurprisalApp {
               return setting.length > this.appSettings.modelNameDisplayLength ? 
                 setting.substring(0, this.appSettings.modelNameDisplayLength) : setting;
             }
+            // Replace '-' with '*' for scale names
+            if (index === this.appSettings.settingsIndices.scale) {
+              return setting.replace(/-/g, '*');
+            }
             return setting;
           });
           indicator.innerHTML = "<span>" + displaySettings.join('</span><span>') + "</span>";
