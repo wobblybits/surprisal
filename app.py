@@ -12,43 +12,46 @@ from flask_limiter.util import get_remote_address
 from flask_wtf.csrf import CSRFProtect
 import secrets
 import time
+from config import get_config
 
+# Get configuration
+config = get_config()
+
+# Create Flask app
 app = Flask(__name__)
 
-# Environment Configuration
-MAX_TEXT_LENGTH = int(os.getenv('MAX_TEXT_LENGTH', 1000))
-DEBUG_MODE = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
-HOST = os.getenv('FLASK_HOST', '0.0.0.0')
-PORT = int(os.getenv('FLASK_PORT', 8001))
-
-# Security Configuration
-SECRET_KEY = os.getenv('FLASK_SECRET_KEY')
-if not SECRET_KEY:
-    if DEBUG_MODE:
-        SECRET_KEY = 'dev-key-not-for-production'
-        print("WARNING: Using default secret key. Set FLASK_SECRET_KEY in production!")
-    else:
-        raise ValueError("FLASK_SECRET_KEY environment variable must be set in production")
-
-app.config['SECRET_KEY'] = SECRET_KEY
+# Apply configuration to Flask app
+app.config['SECRET_KEY'] = config.SECRET_KEY
+app.config['DEBUG'] = config.DEBUG
 
 # CSRF Protection
-CSRF_ENABLED = os.getenv('CSRF_ENABLED', 'True').lower() == 'true'
-if CSRF_ENABLED:
+if config.CSRF_ENABLED:
     csrf = CSRFProtect(app)
 
-# Rate Limiting Configuration
-RATE_LIMIT_STORAGE_URL = os.getenv('RATE_LIMIT_STORAGE_URL', 'memory://')
-RATE_LIMIT_PER_MINUTE = os.getenv('RATE_LIMIT_PER_MINUTE', '10')
-RATE_LIMIT_PER_HOUR = os.getenv('RATE_LIMIT_PER_HOUR', '100')
-
-limiter = Limiter(
-    app,
-    key_func=get_remote_address,
-    storage_uri=RATE_LIMIT_STORAGE_URL,
-    default_limits=[f"{RATE_LIMIT_PER_HOUR} per hour"],
-    headers_enabled=True
-)
+# Rate Limiting Configuration - Only enable in production
+if config.DEBUG:
+    # In development, create a mock limiter that doesn't actually limit
+    class MockLimiter:
+        def limit(self, *args, **kwargs):
+            def decorator(f):
+                return f
+            return decorator
+        
+        def init_app(self, app):
+            pass
+    
+    limiter = MockLimiter()
+    print("Rate limiting DISABLED for development")
+else:
+    # Production rate limiting
+    limiter = Limiter(
+        key_func=get_remote_address,
+        app=app,
+        storage_uri=config.RATE_LIMIT_STORAGE_URL,
+        default_limits=[f"{config.RATE_LIMIT_PER_HOUR} per hour"],
+        headers_enabled=True
+    )
+    print(f"Rate limiting enabled: {config.RATE_LIMIT_PER_MINUTE}/min, {config.RATE_LIMIT_PER_HOUR}/hour")
 
 # Application startup time for health check
 app_start_time = time.time()
@@ -147,8 +150,8 @@ def validate_text_input(text):
         raise ValueError("Text input cannot be empty")
     
     # Use configurable length limit
-    if len(text) > MAX_TEXT_LENGTH:
-        raise ValueError(f"Text too long: {len(text)} chars (max {MAX_TEXT_LENGTH})")
+    if len(text) > config.MAX_TEXT_LENGTH:
+        raise ValueError(f"Text too long: {len(text)} chars (max {config.MAX_TEXT_LENGTH})")
     
     return text  # Return original text, no sanitization
 
@@ -177,9 +180,15 @@ def health_check():
             "uptime_minutes": round(uptime_minutes, 2),
             "models": model_status,
             "config": {
-                "max_text_length": MAX_TEXT_LENGTH,
-                "debug_mode": DEBUG_MODE,
-                "csrf_enabled": CSRF_ENABLED
+                "max_text_length": config.MAX_TEXT_LENGTH,
+                "debug_mode": config.DEBUG,
+                "csrf_enabled": config.CSRF_ENABLED,
+                "flask_env": os.getenv('FLASK_ENV', 'default'),
+                "rate_limiting": {
+                    "storage_url": config.RATE_LIMIT_STORAGE_URL,
+                    "per_minute": config.RATE_LIMIT_PER_MINUTE,
+                    "per_hour": config.RATE_LIMIT_PER_HOUR
+                }
             }
         }
         
@@ -193,7 +202,7 @@ def health_check():
         }), 503
 
 @app.route('/process/', methods=['POST'])
-@limiter.limit(f"{RATE_LIMIT_PER_MINUTE} per minute")
+@limiter.limit(f"{config.RATE_LIMIT_PER_MINUTE} per minute")
 def process_text():
     try:
         # Proper error handling for JSON parsing
@@ -302,7 +311,7 @@ def serve_assets(filename):
 
 # play notes to generate text with appropriate surprisal values
 @app.route('/reverse/', methods=['POST']) 
-@limiter.limit(f"{RATE_LIMIT_PER_MINUTE} per minute")
+@limiter.limit(f"{config.RATE_LIMIT_PER_MINUTE} per minute")
 def music_to_text():
     try:
         # Proper error handling for JSON parsing
@@ -319,8 +328,8 @@ def music_to_text():
             model_name = request.form.get('model', "gpt2")
         
         # Validate inputs
-        if text and len(text) > MAX_TEXT_LENGTH:
-            return json.dumps({"error": f"Text too long: {len(text)} chars (max {MAX_TEXT_LENGTH})"}), 400
+        if text and len(text) > config.MAX_TEXT_LENGTH:
+            return json.dumps({"error": f"Text too long: {len(text)} chars (max {config.MAX_TEXT_LENGTH})"}), 400
         
         validated_model = validate_model_name(model_name)
         
@@ -447,7 +456,7 @@ def ratelimit_handler(e):
     }), 429
 
 # CSRF error handler
-if CSRF_ENABLED:
+if config.CSRF_ENABLED:
     @app.errorhandler(400)
     def csrf_error(reason):
         if 'csrf' in str(reason).lower():
@@ -460,8 +469,10 @@ if CSRF_ENABLED:
 
 if __name__ == "__main__":
     print(f"Starting Surprisal Calculator...")
-    print(f"Rate limiting: {RATE_LIMIT_PER_MINUTE}/min, {RATE_LIMIT_PER_HOUR}/hour")
-    print(f"CSRF protection: {'enabled' if CSRF_ENABLED else 'disabled'}")
-    print(f"Health check available at: http://{HOST}:{PORT}/health")
+    print(f"Environment: {os.getenv('FLASK_ENV', 'default')}")
+    print(f"Debug mode: {config.DEBUG}")
+    print(f"Rate limiting: {config.RATE_LIMIT_PER_MINUTE}/min, {config.RATE_LIMIT_PER_HOUR}/hour")
+    print(f"CSRF protection: {'enabled' if config.CSRF_ENABLED else 'disabled'}")
+    print(f"Health check available at: http://{config.HOST}:{config.PORT}/health")
     
-    app.run(debug=DEBUG_MODE, host=HOST, port=PORT)
+    app.run(debug=config.DEBUG, host=config.HOST, port=config.PORT)

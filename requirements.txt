@@ -10,3 +10,4 @@ blobfile
 Flask-Limiter
 Flask-WTF
 redis
+python-dotenv
