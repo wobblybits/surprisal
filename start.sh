@@ -17,8 +17,8 @@ export RATE_LIMIT_PER_HOUR=${RATE_LIMIT_PER_HOUR:-500}
 export CSRF_ENABLED=${CSRF_ENABLED:-False}
 
 # Model configuration for production (memory optimization)
-export ENABLED_MODELS=${ENABLED_MODELS:flan}
-export DISABLED_MODELS=${DISABLED_MODELS:smollm,-gpt2,distilgpt2,-nano mistral,qwen}
+export ENABLED_MODELS=${ENABLED_MODELS:-flan}
+export DISABLED_MODELS=${DISABLED_MODELS:-smollm,gpt2,distilgpt2,nano mistral,qwen}
 
 # Display configuration
 echo "Environment: $FLASK_ENV"
