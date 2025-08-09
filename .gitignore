@@ -1,8 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+env/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Development files (project-specific)
 elises_scratchpad.js
-node_modules
+elises_scratchpad2.py
+node_modules/
 package-lock.json
 package.json
-elises_scratchpad2.py
-__pycache__/*
-__pycache__/app.cpython-312.pyc
-.gitignore
+
+# Logs
+*.log
+.env.development

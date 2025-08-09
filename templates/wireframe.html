@@ -1,757 +1,139 @@
 <html>
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Coiny&family=Fredoka:wght@300..700&family=Major+Mono+Display&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Offside&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/styles.css">
     <title>Surprisal Calculator</title>
-    <style>
-      @font-face {
-        font-family: "Portfolio";
-        src: url("assets/portfolio.woff") format('woff');
-      }
-      body {
-        display: flex;
-        flex-direction: row;
-        width: 100%;
-        font-family: "Fredoka", sans-serif;
-        background: darkslategray;
-        padding: 2em 0;
-        text-align: center;
-      }
-      #container {
-        display: flex;
-        flex-direction: row;
-        width: 100%;
-        min-width: 875px;
-        max-width: 1000px;
-        margin: auto;
-        position: relative;
-        min-height: 100%;
-        height: calc(100% - 4em);
-      }
-      #calculator {
-        display: flex;
-        border: 2px solid black;
-        flex-direction: column;
-        flex-wrap: wrap;
-        flex: 1;
-        width: calc(50% - 2em); 
-        background: gray;
-        height: calc(100% - 3px);
-        border-radius: 3px;
-        overflow: auto;
-      }
-      #title {
-        display: block;
-        flex-shrink: 2;
-        padding: 1.5em 2em 0;
-        text-align: right;
-        width: calc(100% - 4em);
-        font-style: italic;
-      }
-      #display {
-        padding: 1em 2em 0;
-        height: 36%;
-        display: flex;
-        flex-direction: column;
-      }
-      #display #user-input {
-        background: #aacc99;
-        font-family: "Portfolio", Monospace;
-        width: calc(100%);
-        padding: 2em 1em 1em;
-        outline: none;
-        font-size: 16px;
-        line-height: 24px;
-        border: 2px darkgray inset;
-        border-top: none;
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
-        border-radius: 6px;
-        color: #333;
-        text-shadow: 1px 1px 0 rgba(0,0,0,.2); 
-        min-height: 85%;
-        height: 85%;
-        margin-top: -4px;
-      }
-      #display #indicator {
-        background: #aacc99;
-        text-align: center;
-        vertical-align: middle;
-        font-family: "Portfolio", Monospace;
-        width: calc(100% - 2em - 4px);
-        padding: 0 1em;
-        outline: none;
-        /* font-size: 10px; */
-        /* line-height: 3%; */
-        border: 2px darkgray inset;
-        border-bottom: none;
-        border-radius: 6px;
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
-        color: #333;
-        min-height: 3%;
-        height: 3%;
-        z-index: 9999999;
-      }
-      #display #indicator span {
-        display: inline-block;
-        padding: .5em 0 0;
-        font-size: 0.80em;
-        width: 100px;
-        margin: 0px 8px;
-        border-bottom: 2px solid rgba(0,0,0,.2);
-        color: #333;
-        text-shadow: 1px 1px 0 rgba(0,0,0,.2); 
-        /* background: linear-gradient(to right, rgba(0,0,0,.05) 0px, rgba(0,0,0,.05) 1px, transparent 1px); */
-        background-size: 4px;
-        background-repeat: repeat;
-      }
-      #display textarea:focus {
-        outline: none;
-      }
-      #display textarea::selection {
-        background: #333;
-        color: #aacc99;
-      }
-      #buttons {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: masonry;
-        gap: 5px 10px;
-        flex: 0 0;
-        margin: 1em 0 0 2em;
-        text-transform: uppercase;
-        font-weight: 400;
-        text-shadow: 0 0 2px rgba(255,255,255,0.2);
-        color:#333;
-        max-width: calc(100% - 4em);
-        align-items: flex-start;
-        max-height: calc(66% - 6em);
-      }
-      #buttons > div {
-        display: flex;
-        text-align: center;
-        flex-flow: column wrap;
-      }
-      #buttons > div > div {
-        display: inline-block;
-        flex-flow: column wrap;
-        border: 2px outset gray;
-        background: pink;
-        margin: 2px;
-        align-items: center;
-        justify-content: center;
-        border-radius: 6px;
-        box-sizing: border-box;
-        flex: 1 1;
-        padding: .5em 1em;
-      }
-      #buttons > div > div > img {
-        object-fit: cover;
-        max-width: 32px;
-        max-height: 32px;
-        filter: drop-shadow(0px 0px 20px rgba(205,205,255,.3));
-      }
-      #buttons > div#scales {
-        flex-flow: row wrap;
-        flex: 4;
-      }
-      #buttons > div#scales > div {
-        flex: 1 1;
-        background: #ddddff;
-      }
-      #buttons > div#models {
-        flex-flow: column wrap;
-        flex: 3;
-        grid-column: 2 / 2;
-        grid-row: 1 / 1;
-        grid-row-end: span 2;
-      }
-      #buttons > div#models > div {
-        flex: 2 0;
-        background: #ffeeff;
-        min-width: 80%;
-      }
-      #buttons > div#instruments {
-        flex-flow: row wrap;
-        flex: 1;
-        gap: 3px;
-        grid-row-end: span 2;
-        text-align: center;
-        align-content: center;
-      }
-      #buttons > div#instruments > div {
-        flex: 1 1 15%;
-        /* min-width: 15%; */
-        background: #777799;
-        padding: .5em;
-      }
-      #buttons #translate {
-        display: grid;
-        grid-row: 3 / 2;
-        grid-column: 2 / 2;
-        grid-row-end: span 1;
-        padding-bottom: 4px;
-      }
-      #buttons #translate div {
-        height: 100%;
-        align-content: center;
-        justify-content: center;
-      }
-      #buttons > div > div:hover {
-        background: purple;
-        border: 2px inset gray;
-        color: white;
-        cursor: pointer;
-      }
-      #buttons > div > div:hover img {
-        filter: invert(1);
-      }
-      #buttons > div > div#submit {
-        background: orange;
-        margin-bottom: 1em;
-      }
-      #buttons > div > div#submit:hover {
-        background: red;
-      }
-      #keyboard {
-        display: flex;
-        border-left: 10px solid darkslategrey;
-        width: calc(50% - 2em);
-        position: relative;
-        background: linear-gradient(to right, black 0px, black 2px, transparent 2px, transparent 100%);
-        background-repeat: no-repeat;
-        flex: 1;
-      }
-      #keyboard > div {
-        position: absolute;
-        left: 0;
-        text-align: right;
-        padding-right: 2em;
-        align-content: center;
-        border-top-right-radius: 6px;
-        border-bottom-right-radius: 6px;
-        border-left: 1px solid black;
-        cursor: pointer;
-      }
-      #keyboard .white-key:hover, #keyboard .white-key.highlight {
-        background: pink;
-        color: black;
-      }
-      #keyboard .black-key:hover, #keyboard .black-key.highlight {
-        background: purple;
-        color: white;
-        mix-blend-mode: normal;
-        border: 1px solid black;
-      }
-      #keyboard .white-key {
-        background: white;
-        border: 2px solid black;
-        border-left: 2px solid black;
-        height: 6.5%;
-        width: calc(100% - 3em); /* subtract padding*/
-        color: white;
-      }
-      #keyboard .black-key {
-        background: black;
-        width: 50%;
-        height: 6%;
-        z-index: 99;
-        border: 2px solid white;
-        border-left: 1px solid transparent;
-        left: 1px;
-        color: black;
-        mix-blend-mode: multiply;
-      }
-      #keyboard .disabled {
-        cursor: default;
-        pointer-events: none;
-        opacity: 0.25;
-        /* border: 1px solid black;
-        background: transparent;
-        color: transparent; */
-      }
-    </style>
     <script src="https://unpkg.com/tone"></script>
-    <script>
+    <script type="module">
+      import { SurprisalApp } from "../assets/js/surprisal-app.js";
+
       window.onload = () => {
+        const app = new SurprisalApp();
+        app.init();
         
-        const synth = new Tone.Synth().toDestination();
-        synth.volume.value = .5;
-        
-        let currentVector = [1,2,3,4,5,6,7,8,9,10];
-        Tone.Transport.start(0);
-        
-        let currentSettings = ["THEREMIN", "MAJ HEPT", "GPT2"];
-        const indicator = document.getElementById('indicator');
-        indicator.innerHTML = "<span>" + currentSettings.join('</span><span>') + "</span>";
-
-        const presets = {
-          "xylophone": {
-            "portamento" : 0.0,
-            "oscillator": {
-                "type": "sine",
-                "partials": [1,0,2,0,3]   
-            },
-            "envelope": {
-                "attack": 0.001,
-                "decay": 1.2,
-                "sustain": 0,
-                "release": 1.2
-            }
-          },
-          flute: {
-            "portamento" : 0.0,
-            "oscillator": {
-                "type": "fatsine",
-                "partials": [1,1,.1,.2,.15,.01,.01,.01],
-                "partialCount": 8,
-                "modulationType": "sine4",
-                "phase": 1,
-                "spread": 20,
-                "count": 2
-            },
-            "envelope": {
-                "attack": .5,
-                "decay": 2,
-                "sustain": 1,
-                "release": 1
-            },
-          },
-          violin: {
-            "portamento" : 0.01,
-            "oscillator": {
-                "type": "fmsquare",
-                "modulationType": "sawtooth",
-                "harmonicity": 4,
-                "partials": [1,.6,.6,.7,.5,.2,.5,.15],
-                "partialCount": 8,
-            },
-            "envelope": {
-                "attack": 2.2,
-                "decay": 0.3,
-                "sustain": 1,
-                "release": 1.2
-            },
-          },
-          theremin: {
-            "portamento" : 0.07,
-            "oscillator": {
-                "type": "sine",
-                "partials": [1,0.1]
-            },
-            "envelope": {
-                "attack": 0.1,
-                "decay": 1.2,
-                "sustain": 1,
-                "release": 1
-            }
-          },
-          piano: {
-            "portamento" : 0.0,
-            "oscillator": {
-                "type": "amsine",
-                "modulationType": "triangle",
-                "harmonicity": .5,
-                "partials": [1,0.5, 0.3, 0.2,0.1]
-            },
-            "envelope": {
-                "attack": 0.001,
-                "decay": 2,
-                "sustain": 0,
-                "release": 3
-            }
-          },
-          choir: {
-            "portamento" : 0.01,
-            "oscillator": {
-                "type": "fatsine",
-                "modulationType": "sine4",
-                "partials": [1,1,.9,1,1.2,.4,.8, .7],
-                "partialCount": 2,
-                "spread": 10,
-                "phase": Math.PI*2,
-                "count": 4,
-            },
-            "envelope": {
-                "attack": 2,
-                "decay": 0,
-                "sustain": 1,
-                "release": 2
-            }
-          }
-        };
-
-        const scaleIntervals = {
-          "maj hept": [0,2,4,5,7,9,11,12,14,16,17,19,21,23],
-          "min hept": [0,2,3,5,7,8,10,12,14,15,17,19,20,22],
-          "maj pent": [0,2,4,7,9,12,14,16,19,21],
-          "min pent": [0,3,5,8,10,12,15,17,20,22],
-          "chromatic": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
-          "continuous": []
-        };
-
-        synth.set(presets["theremin"]);
-
-        let currentScale = Object.keys(scaleIntervals)[0];
-
-        const instruments = Object.keys(presets);
-        const scales = Object.keys(scaleIntervals);
-
-        const notes = ["A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab"];
-        
-        function fetchFromBackend(text) {
-          // Ensure text is not trimmed
-          const cleanText = text.trim(); // Only trim leading/trailing whitespace if needed
-          fetch('/process/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({text: cleanText})
-          })
-          .then(response => response.json())
-          .then(data => {
-            playMelody(data);
+        // Make rotation overlay dismissible
+        const rotationOverlay = document.getElementById('rotation-overlay');
+        if (rotationOverlay) {
+          rotationOverlay.addEventListener('click', () => {
+            rotationOverlay.classList.add('hidden');
           });
         }
-
-        function fetchFromBackendReverse(text, scale_pitch) {
-          try {
-            const interval = scaleIntervals[currentScale].indexOf(scale_pitch);
-            fetch('/reverse/', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({text: text, note: interval})
-            })
-            .then(response => response.json())
-            .then(data => {
-              console.log(data);
-              const userInput = document.getElementById('user-input');
-              // Preserve any existing whitespace and add the new token
-              const currentText = userInput.value;
-              const newText = data.input_text + data.best_token;
-              userInput.value = newText;
-              userInput.setSelectionRange(data.input_text.length, data.input_text.length + data.best_token.length);
-              userInput.focus();
-              userInput.blur();
-            });
-          }
-          catch (e) {
-            console.log(e);
-          }
-        }
-
-        function playVector(vector) {
-            console.log(vector);
-            const notes = vector.map(d => Tone.Frequency("C3").transpose(Math.round(d)));
-            console.log(notes);
-            var seq = new Tone.Sequence(function(time, note){
-                synth.triggerAttackRelease(note, "8n", time);
-            }, notes, "4n");
-            seq.loop = false;
-            seq.start(0);
-            Tone.start();
-        }
-        
-        function convertSharpToFlat(note) {
-          if (note.indexOf("#") == 1) {
-            return notes[notes.indexOf(note[0])+1] + note[2];
-          }
-          return note;
-        }
-        
-        function convertFlatToSymbol(note) {
-          return note.replace("b", "&flat;");
-        }
-
-        function convertToScale(surprisals) {
-          let converted_pitches = [];
-          for(let i = 0; i < surprisals.length; i++) {
-            let interval = Math.round(surprisals[i]/2);
-            let scaleLength = scaleIntervals[currentScale].length;
-            if (interval > scaleLength - 1) {
-              converted_pitches.push(scaleIntervals[currentScale][scaleLength - 1])
-            }
-            else {
-              converted_pitches.push(scaleIntervals[currentScale][interval]);
-            }
-          }
-          return converted_pitches
-        }
-
-        function convertToContinuous(surprisals) {
-          let converted_pitches = [];
-          for (let i = 0; i < surprisals.length; i++) {
-            converted_pitches.push((surprisals[i] * 50).toString());
-          }
-          // set first note to c3 since 0hz isn't audible
-          converted_pitches[0] = 130; 
-          console.log(converted_pitches);
-          return converted_pitches;
-        }
-        
-        async function playMelody(data) {
-            await Tone.start();
-            let surprisals = data.surprisals;
-            let pitches = [];
-            let notes = [];
-            if (currentScale === "continuous") {
-              pitches = convertToContinuous(surprisals);
-              notes = pitches;
-              }
-            else {
-              pitches = convertToScale(surprisals);
-              notes = pitches.map(d => Tone.Frequency("C3").transpose(d));
-            }
-            let durations = data.lengths;
-            let volumes = data.frequencies_inverted;
-            let delay = Tone.now();
-            let offset = delay;
-            let timeouts = [];
-            //let notes = pitches.map(d => Tone.Frequency("C3").transpose(d))
-
-            const userInput = document.getElementById('user-input');
-            let startIndex = 0;
-            let endIndex = 0;
-
-            for(let i = 0; i < surprisals.length; i++) {
-                timeouts.push(delay);
-                endIndex = startIndex + durations[i];
-                const s = startIndex;
-                const e = endIndex;
-                durations[i] /= 8;
-                synth.volume.value = volumes[i] / 8;
-                
-                synth.triggerAttackRelease(notes[i], durations[i], delay);  
-                window.setTimeout(() => {
-                  // console.log(notes[i].toNote(), convertSharpToFlat(notes[i].toNote()), "start", Tone.Time(durations[i]).toSeconds() * 1000, Tone.Time(timeouts[i]).toSeconds() * 1000); 
-                  const key = document.getElementById(convertSharpToFlat(notes[i].toNote()));
-                  key.classList.add("highlight");
-                  userInput.setSelectionRange(s, e);
-                  userInput.focus();
-                  window.setTimeout(() => {
-                    // console.log(key, notes[i].toNote(), "end");
-                    userInput.blur();
-                    userInput.setSelectionRange(0, 0);
-                    key.classList.remove("highlight");
-                  }, Tone.Time(durations[i]).toSeconds() * 900);
-                }, (Tone.Time(timeouts[i]).toSeconds() - offset) * 1000);
-                delay += durations[i];
-                startIndex = endIndex;
-            }
-        }   
-        
-        const models = ["gpt2", "smollm", "nano mistral", "smol llama", "qwen", "flan"];
-        
-        const instrument_container = document.getElementById("instruments");
-
-
-        for (i in instruments) {
-          const button = document.createElement("div");
-          button.id = instruments[i];
-          button.innerHTML = "<img src='assets/" + instruments[i] + ".png' />";
-          button.onclick = (e) => {
-            const instrument = button.id;
-            const preset = presets[instrument];
-            console.log(instruments, presets, instrument, preset, button, e.target);
-            synth.set(preset);
-            currentSettings[0] = instrument.toUpperCase();
-            const indicator = document.getElementById('indicator');
-            indicator.innerHTML = "<span>" + currentSettings.join('</span><span>') + "</span>";
-          }
-          instrument_container.appendChild(button);
-        }
-        
-        const scales_container = document.getElementById("scales");
-        for (i in scales) {
-          const button = document.createElement("div");
-          button.id = scales[i];
-          button.innerHTML = scales[i];
-          button.onclick = (e) => {
-            const selectedScale = button.id;
-            const intervals = scaleIntervals[selectedScale];
-            console.log(selectedScale, intervals, button, e.target);
-            currentScale = selectedScale;
-            currentSettings[1] = selectedScale.toUpperCase();
-            const indicator = document.getElementById('indicator');
-            indicator.innerHTML = "<span>" + currentSettings.join('</span><span>') + "</span>";
-            document.querySelectorAll("#keyboard div").forEach((key, i) => {
-              if (scaleIntervals[selectedScale].includes(i)) {
-                key.classList.remove("disabled");
-              }
-              else {
-                key.classList.add("disabled");
-              }
-            });
-          }
-          scales_container.appendChild(button);
-        }
-        
-        const models_container = document.getElementById("models");
-        for (i in models) {
-          const button = document.createElement("div");
-          button.id = models[i];
-          button.innerHTML = models[i];
-          button.onclick = (e) => {
-            const selectedModel = button.id;
-            console.log(selectedModel, button, e.target);
-            currentSettings[2] = selectedModel.toUpperCase();
-            const indicator = document.getElementById('indicator');
-            indicator.innerHTML = "<span>" + currentSettings.join('</span><span>') + "</span>";
-            fetch(`/model/${selectedModel}`, {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            }).then(response => response.json())
-            .then(data => {
-              console.log(data);
-            });
-          }
-          models_container.appendChild(button);
-        }
-        
-        let startingNote = "C";
-        let startingPitch = notes.indexOf(startingNote);
-        let startingOctave = 3;
-        
-        const piano_container = document.getElementById("keyboard");
-        let spacing = 0;
-        const numOctaves = 2;
-        const numKeysPastOctave = 0;
-        
-        for (var i = 0; i < numOctaves*12 + numKeysPastOctave; i++) {
-          const key = document.createElement("div");
-          const note = notes[(i+startingPitch) % notes.length];
-          key.id = note + (startingOctave + Math.floor(i/12));
-          const scale_pitch = i;
-          if (note.length > 1) {
-            key.style.bottom = (100*(spacing-.5)/(numOctaves * 7 + numKeysPastOctave)) + "%";
-            key.classList.add("black-key");
-          }
-          else {
-            key.style.bottom = (100*spacing/(numOctaves * 7 + numKeysPastOctave)) + "%";
-            key.classList.add("white-key");
-            spacing++;
-          }
-          key.innerHTML = convertFlatToSymbol(key.id);
-          if (scaleIntervals[currentScale].includes(i)) {
-              key.classList.remove("disabled");
-            }
-            else {
-              key.classList.add("disabled");
-            }
-          key.onclick = (e) => {
-            synth.triggerAttackRelease(key.id, "8n", Tone.now());
-            const text = document.getElementById("user-input").value;
-            try {
-              fetchFromBackendReverse(text, scale_pitch);
-            }
-            catch (e) {
-              console.log(e);
-            }
-          }
-          piano_container.appendChild(key);
-        }
-        
-        const submitButton = document.getElementById("submit");
-        submitButton.onclick = (e) => {
-          const text = document.getElementById("user-input").value;
-          try {
-            fetchFromBackend(text);
-          }
-          catch (e) {
-            console.log(e);
-          }
-        }
-
-        var lastKeyPress = {
-          key: null,
-          time: null,
-          note: null,
-        }
-        window.onkeydown = (e) => {
-          if (document.activeElement.id === "user-input") {
-            return;
-          }
-          if (lastKeyPress.key != e.key && parseInt(e.key) > 0 && parseInt(e.key) < 10) {
-            if (lastKeyPress.key !== null) {
-              const timeDiff = Math.round((performance.now() - lastKeyPress.time) / 62.5);
-              console.log("keyup", lastKeyPress.key, parseInt(lastKeyPress.key), timeDiff, lastKeyPress.note);
-              const text = document.getElementById("user-input").value;
-              try {
-                fetchFromBackendReverse(text, scaleIntervals[currentScale][parseInt(lastKeyPress.key) - 1]);
-                const key = document.getElementById(convertSharpToFlat(lastKeyPress.note.toNote()));
-                key.classList.remove("highlight");
-              }
-              catch (e) {
-                console.log(e);
-              }
-            }
-            lastKeyPress.key = e.key;
-            lastKeyPress.time = performance.now();
-            const pitch = convertToScale([(parseInt(lastKeyPress.key) - 1)*2]);
-            const note = Tone.Frequency("C3").transpose(pitch);
-            lastKeyPress.note = note;
-            synth.triggerAttackRelease(note, "8n", Tone.now());
-            const key = document.getElementById(convertSharpToFlat(lastKeyPress.note.toNote()));
-            key.classList.add("highlight");
-          }
-        }
-        window.onkeyup = (e) => {
-          if (document.activeElement.id === "user-input" || lastKeyPress.key === null) {
-            return;
-          }
-          if (lastKeyPress.key === e.key) {
-            const timeDiff = Math.round((performance.now() - lastKeyPress.time) / 62.5);
-            console.log(timeDiff);
-            const text = document.getElementById("user-input").value;
-            try {
-              console.log("keyup", lastKeyPress.key, parseInt(lastKeyPress.key), timeDiff, lastKeyPress.note);
-              fetchFromBackendReverse(text, scaleIntervals[currentScale].indexOf(parseInt(lastKeyPress.key) - 1));
-              const key = document.getElementById(convertSharpToFlat(lastKeyPress.note.toNote()));
-                key.classList.remove("highlight");
-            }
-            catch (e) {
-              console.log(e);
-            }
-            lastKeyPress.key = null;
-            lastKeyPress.time = null;
-          }
-        }
-      }
+      };
     </script>
   </head>
   <body>
-    <div id="container">
-      <div id="calculator">
-        <div id="title">Surprisal Calculator</div>
-        <div id="display">
-          <div id="indicator">stuff</div> 
-          <textarea id="user-input" placeholder="Type something"></textarea>
-        </div>
-        <div id="buttons">
-          <div id="scales">
-          
-          </div>
-          <div id="models">
-          
-          </div>
-          <div id="instruments">
-          
-          </div>
-          <div id="translate">
-            <div id="submit">Compose</div>
-          </div>
-        </div>
+    <!-- NEW: Rotation overlay for portrait mobile -->
+    <div id="rotation-overlay">
+      <div class="icon-wrapper">
+        <img class="icon" src="../assets/images/sticker.png" alt="Rotate device">
       </div>
-      <div id="keyboard">
+      <h2>Rotate Device</h2>
+      <p>This calculator works best in landscape orientation for optimal button size and visibility.</p>
+      <small>You can still use it in portrait, but the experience will be better rotated.</small>
+      <small style="margin-top: 1rem; opacity: 0.6;">Tap anywhere to dismiss</small>
+    </div>
+    
+    <div id="header-links">
+      <a href="https://github.com/wobblybits/surprisal" target="_blank" rel="noopener" class="header-link" aria-label="View on GitHub">
+        <img src="https://img.shields.io/github/stars/wobblybits/surprisal?style=social" alt="GitHub stars" class="star-badge">
+      </a>
+      <script async defer src="https://www.recurse-scout.com/loader.js?t=62e333ccfa9ade523f73c9755aa46503"></script>
+    </div>
+    
+    <!-- NEW: Viewport wrapper around container -->
+    <div id="viewport">
+      <div id="container">
+        <div id="calculator">
+          <div id="title">WM7<span style="font-size: .8em; font-family: portfolio">±</span>2</div>
+          <div id="display">
+            <div id="indicator"></div> 
+            <textarea id="user-input" placeholder="Enter text here..."></textarea>
+          </div>
+          <div id="buttons">
+            <div id="scales"></div>
+            <div id="models"></div>
+            <div id="instruments"></div>
+            <div id="translate">
+              <div id="submit">Compose ♫</div>
+            </div>
+          </div>
+        </div>
+        <div id="keyboard"></div>
+      </div>
+    </div>
+    
+    <div id="explainer">
+      <h1 id="heading">
+        The Surprisal Calculator WM7±2
+      </h1>
+      <h4>Made by David Feil and Elise Kim during a batch at the <a href="https://www.recurse.com" target="_blank"></a>Recurse Center</a>.</h4>
+
+        <p>On this page, we invite you to experiment with the <strong>Surprisal Calculator WM 7±2</strong>, a tool developed to turn the flow of information in human language into melodies. According to <strong>surprisal theory</strong>, the more surprising a sentence is, the longer it takes for the human brain to understand. To see this in action, consider the two sentences below:</p> 
+
+        <div id="examples">
+          <div class="example-wrapper">
+            <div id="ex1" class="example"> CLICK: sentence 1</div>
+            <div id="ex1_hidden" class="example hiding"> The man fed the <strong>cat</strong> some tuna.</div>
+          </div>
+          <div class="example-wrapper">
+            <div id="ex2" class="example"> CLICK: sentence 2</div>
+            <div id="ex2_hidden" class="example hiding"> The lawyer presented the <strong>cat</strong> with a lawsuit.</div>
+          </div>
+        </div>
+
+        <p>Even though the word <em>cat</em> appears in both sentences, it's far more surprising in the context of the second sentence. Odds are that the second sentence also took you longer to process.</p>
+        <p>This seemingly fuzzy notion of "surprisingness" can actually be quantified using a formula first developed by Claude Shannon, the father of information theory. An event's surprisal is calculated as the negative log probability of that event happening in its given context. Applied to language, each word is an event, and the context is the sentence it appears in. Large language models, like GPT, provide a convenient way to calculate word probabilities in context.</p>
+        <div id="equation">
+          Surprisal(x) = -log<sub>2</sub> P(x | context)
+        </div>
+        <p>Coming back to our examples: in sentence 1, <em>cat</em> has a low surprisal value, because it appears in a sentence where talking about cats is very probable. In sentence 2, <em>cat</em> has a high surprisal value, because lawyers giving cats lawsuits is improbable.</p>
+
+        <p>Surprisal is a fascinating way to measure how the human brain handles unpredictability in language. However, surprisal numbers aren't very intuitive to understand on their own. With the <strong>Surprisal Calculator WM 7±2</strong>, you can now input any sentence and hear its surprisal values translated to pitch intervals: a low pitch indicates low surprisal, and a high pitch indicates high surprisal.</p> 
+
+        <div id="demo-wrapper">
+          <div id="ex1_demo"> CLICK to hear sentence 1</div>
+          <div id="ex2_demo"> CLICK to hear sentence 2</div>
+        </div>
+
+        <p>The decision to translate surprisal numbers to musical pitches was not arbitrary. A good, informative sentence is made from a blend of predictability (low surprisal) and spontaneity (high surprisal); the same could also be said of a good melody. We quickly bore of a sentence made only of repetitive, predictable words ("he said that he thought that she said that they think that…"), we also quickly bore of a melody made of the same note, repeated over and over again. The delicate balancing act of predictability and spontaneity that plays out in both language and music seems to hint at a shared cognitive architecture used in both forms of expression.</p>
+        <h1 id="how-to-use-the-surprisal-calculator-wm-72">How to use the
+        Surprisal Calculator</h1>
+        <ul>
+        <li><p>Type any sentence in, and press <code>compose</code> to hear its surprisal values.</p></li>
+        <li><p>Use the calculator buttons to adjust instrument type, the LLM used to calculate probability scores, and the scale used to match surprisal numbers to pitches.</p></li>
+        <li><p>Try typing the beginning of a sentence, then clicking keys on the keyboard. This will generate text with the surprisal values corresponding to the key pitch: experiment with what a very low surprisal or very high surprisal sentence sounds like. We suggest playing a common melody on the keyboard ("jingle bells" is a good candidate). Good melodies, which balance repetition with variety, tend to generate good sentences.</p></li></ul>
         
-      </div>
+        <h1>Sources and Code</h1>
+        <p>
+          <a href="https://github.com/wobblybits/surprisal" target="_blank" rel="noopener" class="github-repo-badge">
+            <svg class="github-badge-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.374 0 0 5.373 0 12 0 17.302 3.438 21.8 8.207 23.387c.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+            </svg>
+            <span class="repo-path">wobblybits/surprisal</span>
+          </a>
+          (source code)
+        </p>
+        <p><a href="https://aclanthology.org/2023.tacl-1.82/">Testing the Predictions of Surprisal Theory in 11 Languages</a> (Wilcox et al., TACL 2023)</p>
+
+        <p><a href="https://doi.org/10.1016/j.cognition.2007.05.006"> Expectation-based syntactic comprehension</a> (Levy, Cognition 2008)</p>
+        <p><a href="https://doi.org/10.1002/j.1538-7305.1948.tb01338.x">A mathematical theory of communication</a> (Shannon, 1948)</p>
+
+        <h1>Assets & Models</h1>
+        <p><a href="https://huggingface.co/gpt2">GPT2</a>: The smallest (124M parameters) version of the official open-sourced GPT-2 models released from OpenAI.</p>
+        <p><a href="https://huggingface.co/distilbert/distilgpt2">DistilGPT2</a>: An English-language model (88.2M parameters) pre-trained with the supervision of the smallest version of Generative Pre-trained Transformer 2 (GPT-2).</p>
+        <p><a href="https://huggingface.co/HuggingFaceTB/SmolLM-135M">SmolLM</a>: The smallest (135M parameters) of the three models in the SmolLM series of state-of-the-art small language models developed by the Hugging Face research team. These models are built on Cosmo-Corpus, a meticulously curated high-quality training dataset.</p>
+        <p><a href="https://huggingface.co/crumb/nano-mistral">Nano Mistral</a>: A small (170M parameters) Mistral model built for general web text completion at extremely low resource use.</p>
+        <p><a href="https://huggingface.co/KingNish/Qwen2.5-0.5b-Test-ft">Qwen 2.5</a>: A compact yet powerful language model (494M parameters) trained on a subset of the Magpie 300k Database to answer a variety of questions</p>
+        <p><a href="https://huggingface.co/google/flan-t5-small">Flan T5</a>: Google's super small (74M parameters)version of the Text-To-Text Transfer Transformer (T5) model, fine-tuned on more than 1000 additional tasks (and more languages!).</p>
+        <p>Calculator display font is <a href="https://int10h.org/oldschool-pc-fonts/fontlist/font?portfolio_6x8#-">Portfolio 6x8</a> from the <a href="https://int10h.org/oldschool-pc-fonts/">Old School PC Fonts project</a></p>
+        <p>Calculator button font is <a href="https://fonts.google.com/specimen/Fredoka">Fredoka</a> by <a href="https://milenabrandão.com/">Milena Brandão</a></p>
+        <p>Instrument icons by <a href="https://www.flaticon.com/authors/ains">Ains</a> and <a href="https://www.flaticon.com/authors/iconpack">IconPack</a> at <a href="https://www.flaticon.com/">Flaticon</a></p>
+        <p>Sounds generated with <a href="https://tonejs.github.io/">Tone.js</a></p>
+        <p>Cat <a href="https://pixabay.com/sound-effects/cat-meow-8-fx-306184/">sound effect</a> by <a href="https://buymeacoffee.com/bfcmusic">bfcmusic</a></p>
+        <p>Cat playing with knitting yarn adapted from <a href="https://www.flaticon.com/free-icons/cat-playing-with-knitting-yarn" title="cat playing with knitting yarn icons">icons</a> created by <a href="https://www.flaticon.com/authors/kerismaker">kerismaker</a> at  <a href="https://www.flaticon.com/">Flaticon</a></p>
     </div>
   </body>
 </html>

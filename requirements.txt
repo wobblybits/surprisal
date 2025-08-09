@@ -4,3 +4,10 @@ NLTK
 numpy
 surprisal[transformers]
 wordfreq
+tiktoken
+protobuf
+blobfile
+Flask-Limiter
+Flask-WTF
+redis
+python-dotenv
