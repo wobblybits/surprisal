@@ -10,7 +10,6 @@
       import { presets, scaleIntervals, notes, models } from "../assets/config.js";
 
       window.onload = () => {
-        
         const synth = new Tone.Synth().toDestination();
         synth.volume.value = .5;
 
@@ -37,7 +36,6 @@
         for (const group of scaleGroups) {
           scales = {...scales,  ...scaleIntervals[group]};
         }
-        console.log(scales, scaleIntervals, scaleGroups);
         let currentScale = Object.keys(scales)[0];
         
         function fetchFromBackend(text) {
@@ -430,29 +428,21 @@
   <body>
     <div id="container">
       <div id="calculator">
-        <div id="title">WM7±2</div>
+        <div id="title">WM7<span style="font-size: .8em; font-family: portfolio">±</span>2</div>
         <div id="display">
           <div id="indicator"></div> 
           <textarea id="user-input" placeholder="Enter text here..."></textarea>
         </div>
         <div id="buttons">
-          <div id="scales">
-          
-          </div>
-          <div id="models">
-          
-          </div>
-          <div id="instruments">
-          
-          </div>
+          <div id="scales"></div>
+          <div id="models"></div>
+          <div id="instruments"></div>
           <div id="translate">
             <div id="submit">Compose ♫</div>
           </div>
         </div>
       </div>
-      <div id="keyboard">
-        
-      </div>
+      <div id="keyboard"></div>
     </div>
     <div id="explainer">
       <h1 id="heading">
