@@ -6,7 +6,7 @@
 
 ![Surprisal Calculator Interface](./preview/interface.png)
 
-![Surprisal Calculator Demo](./preview/cat.mp4)
+[Surprisal Calculator Demo Video](https://github.com/user-attachments/assets/70932955-181f-4263-9641-2505d6971241)
 
 ## 🎵 What is Surprisal?
 
