@@ -114,7 +114,7 @@ export const applicationSettings = {
     minKey: 1,
     maxKey: 9
   },
-  defaultSettings: ["THEREMIN", "MAJOR-7", "FLAN"],
+  defaultSettings: ["THEREMIN", "MAJOR-7", "SMOLLM"],
   defaultVector: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 };
 
