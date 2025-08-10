@@ -97,6 +97,8 @@ Each model has different tokenization and surprisal characteristics, leading to 
 
 More detailed attributions are included at the bottom of the main html file.
 
-## 📄 License
+## ❤️ Appreciation
 
-This project is open source. Built with ❤️ at the [Recurse Center](https://www.recurse.com/).
+Built with ❤️ at the [Recurse Center](https://www.recurse.com/).
+
+All rights reserved.
