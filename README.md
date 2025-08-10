@@ -30,7 +30,7 @@ This is meant as a fun experiment to help build intuition about how humans proce
 
 The results change on the model used, both due to the underlying tokenization process that each uses as well as the statistical models that develop during their training. Making these differences audible (and interactive) has been a fun way to build new intuition and make the "black box" of the models' inner workings more accessible.
 
-We have chosen to focus on small models, partly to lower the computational overhead required, but also to get a sense of how these little guys are trying to squeeze as much coherence as possible out of their training. The [live](https://surprisal.onrender.com) demo only exposes the smallest model (Flan-T5), but cloning the repo and running it locally would allow you to experiment with the other small models we selected or to choose your own!
+We have chosen to focus on small models, partly to lower the computational overhead required, but also to get a sense of how these little guys are trying to squeeze as much coherence as possible out of their training. The [live](https://surprisal.onrender.com) demo only exposes one model, but cloning the repo and running it locally would allow you to experiment with the other models we have selected or to choose your own!
 
 ## 🚀 Quick Start
 
