@@ -9,7 +9,7 @@ An innovative web application that bridges linguistics and music by calculating 
 
 ![Surprisal Calculator Interface](./preview/interface.png)
 
-![Surprisal Calculator Demo](./preview/cat.mp4)
+[Surprisal Calculator Demo Video](https://github.com/user-attachments/assets/8bc49f66-42d7-450b-9b87-2a8b67d6260b)
 
 ## 🎵 What is Surprisal?
 
