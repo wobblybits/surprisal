@@ -766,9 +766,9 @@ strong {
 /* ===== RESPONSIVE SCALING SYSTEM ===== */
 
 /* Portrait mobile - show rotation suggestion overlay */
-@media (orientation: portrait) and (max-width: 660px) and (min-height: 769px) {
+@media (orientation: portrait) and (max-width: 660px) and (min-height: 769px), (orientation: portrait) and (max-width: 660px) {
   :root {
-    --viewport-scale: 0.5;
+    --viewport-scale: 0.6;
   }
   
   #rotation-overlay {
@@ -784,7 +784,7 @@ strong {
 }
 
 /* Tablets in landscape - good experience */
-@media (orientation: landscape) and (max-width: 1024px) and (min-width: 769px) {
+@media (max-width: 1024px) and (min-width: 769px) {
   :root {
     --viewport-scale: 0.8;
   }
@@ -816,6 +816,9 @@ strong {
     min-height: 440px;    
     height: calc(100% - 300px);
   }
+  #calculator {
+    height: 440px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -835,26 +838,26 @@ strong {
 }
 
 /* Small mobile landscape */
-@media (orientation: landscape) and (max-width: 480px) and (min-width: 376px) {
+@media (max-width: 660px) and (min-width: 376px) {
   :root {
     --viewport-scale: 0.6;
     --padding-body: 0;
   }
   
   #container {
-    min-width: 320px;
+    min-width: 800px;
   }
 }
 
 /* Very small mobile landscape */
-@media (orientation: landscape) and (max-width: 375px) {
+@media (max-width: 375px) {
   :root {
     --viewport-scale: 0.5;
     --padding-body: 0;
   }
   
   #container {
-    min-width: 280px;
+    min-width: 800px;
   }
 }
 
@@ -871,12 +874,12 @@ strong {
 }
 
 /* Very tall portrait screens (like phones) - emergency fallback */
-@media (orientation: portrait) and (max-width: 768px) and (min-height: 800px) {
+/* @media (orientation: portrait) and (max-width: 768px) and (min-height: 800px) {
   :root {
     --viewport-scale: 0.5;
     --padding-body: 0;
   }
-}
+} */
 
 /* Wiggling note animation for submit button */
 .wiggling-notes {
