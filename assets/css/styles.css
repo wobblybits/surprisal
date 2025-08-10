@@ -295,9 +295,10 @@ strong {
   width: 100%;
   min-width: var(--container-min-width);
   max-width: var(--container-max-width);
-  margin: auto;
+  margin: 0 auto;
   position: relative;
   height: var(--container-height);
+  max-height: 800px;
   min-height: 660px;
   /* Ensure container doesn't break out of scaled viewport */
   flex-shrink: 0;
@@ -768,7 +769,7 @@ strong {
 /* Portrait mobile - show rotation suggestion overlay */
 @media (orientation: portrait) and (max-width: 660px) and (min-height: 769px), (orientation: portrait) and (max-width: 660px) {
   :root {
-    --viewport-scale: 0.6;
+    --viewport-scale: 0.5;
   }
   
   #rotation-overlay {
@@ -830,6 +831,18 @@ strong {
   }
 }
 
+@media (orientation: portrait) and (max-width: 660px) and (min-width: 560px) {
+  #viewport {
+    max-height: 500px;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 560px) {
+  #viewport {
+    max-height: 400px;
+  }
+}
+
 @media (max-width: 768px) and (min-width: 660px) {
   :root {
     --viewport-scale: 0.7;
@@ -837,10 +850,16 @@ strong {
   }
 }
 
-/* Small mobile landscape */
-@media (max-width: 660px) and (min-width: 376px) {
+@media (max-height: 500px) {
+  #viewport {
+    max-height: 400px;
+  }
+}
+
+
+@media (max-width: 660px) and (min-width: 560px) {
   :root {
-    --viewport-scale: 0.6;
+    --viewport-scale: 0.65;
     --padding-body: 0;
   }
   
@@ -849,10 +868,10 @@ strong {
   }
 }
 
-/* Very small mobile landscape */
-@media (max-width: 375px) {
+
+@media (max-width: 559px) and (min-width: 450px) {
   :root {
-    --viewport-scale: 0.5;
+    --viewport-scale: 0.55;
     --padding-body: 0;
   }
   
@@ -861,25 +880,16 @@ strong {
   }
 }
 
-/* Tablets in portrait - smaller scale but still usable */
-@media (orientation: portrait) and (min-width: 769px) {
+@media (max-width: 450px) {
   :root {
-    --viewport-scale: .8;
+    --viewport-scale: 0.45;
     --padding-body: 0;
   }
   
-  #rotation-overlay {
-    display: none; /* Don't show rotation message on large tablets */
+  #container {
+    min-width: 800px;
   }
 }
-
-/* Very tall portrait screens (like phones) - emergency fallback */
-/* @media (orientation: portrait) and (max-width: 768px) and (min-height: 800px) {
-  :root {
-    --viewport-scale: 0.5;
-    --padding-body: 0;
-  }
-} */
 
 /* Wiggling note animation for submit button */
 .wiggling-notes {

@@ -40,8 +40,11 @@ We have chosen to focus on small models, partly to lower the computational overh
 # Clone and setup
 git clone https://github.com/wobblybits/surprisal.git
 cd surprisal
+pip install -r requirements.txt
 python app.py
 ```
+
+The first time you run it, the transformers library will download and cache the model tensors, which all combined is ~3GB. You can disable certain models in `config.py`. If you want to add your own models, you will need to edit `app.py` to provide the configuration details as well as enable them in `config.py`.
 
 ### Repository Structure
 ```
