@@ -1,5 +1,5 @@
 # Surprisal Calculator WM7±2
-![https://www.recurse.com/](https://img.shields.io/badge/created%20at-recurse%20center-white)
+[![The Recurse Center](https://img.shields.io/badge/created%20at-recurse%20center-white)](https://www.recurse.com/)
 
 > Converting the surprisingness of language into musical compositions
 
