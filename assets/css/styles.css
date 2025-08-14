@@ -1075,7 +1075,7 @@ strong {
   color: inherit;
 }
 
-#buttons .active-button {
+#calculator:hover #buttons .active-button {
   --active-color: lightpink;
   --active-width: 2px;
   border: 2px outset purple !important;
