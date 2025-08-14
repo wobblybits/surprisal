@@ -11,6 +11,8 @@ export class SurprisalApp {
     this.appSettings = applicationSettings;
     this.audioSettings = audioSettings;
     this.uiSettings = uiSettings;
+    this.requestQueue = [];
+    this.isProcessingRequest = false;
 
     // Application state
     this.state = {
@@ -33,8 +35,12 @@ export class SurprisalApp {
       updateIndicator: () => {
         const indicator = document.getElementById('indicator');
         if (indicator) {
+          document.querySelectorAll('.active-button').forEach(button => {
+            button.classList.remove('active-button');
+          });
           // Create a copy of currentSettings and crop the model name to configured length
           const displaySettings = this.state.currentSettings.map((setting, index) => {
+            document.getElementById(setting.toLowerCase()).classList.add('active-button');
             if (index === this.appSettings.settingsIndices.model) {
               return setting.length > this.appSettings.modelNameDisplayLength ? 
                 setting.substring(0, this.appSettings.modelNameDisplayLength) : setting;
@@ -398,8 +404,13 @@ export class SurprisalApp {
       this.state.setLoading(false);
     }
   }
-
   async fetchFromBackendReverse(text, scalePitch) {
+    if (this.isProcessingRequest) {
+      this.requestQueue.push({ text, scalePitch });
+      return;
+    }
+
+    this.isProcessingRequest = true;
     try {
       if (!this.state.currentScale || !this.state.scales[this.state.currentScale] || !Array.isArray(this.state.scales[this.state.currentScale])) {
         throw new Error('Invalid scale configuration');
@@ -449,6 +460,12 @@ export class SurprisalApp {
       userInput.blur();
       
       AccessibilityUtils.announceToScreenReader('Text generated successfully');
+
+      this.isProcessingRequest = false;
+      if (this.requestQueue.length > 0) {
+        const nextRequest = this.requestQueue.shift();
+        this.fetchFromBackendReverse(userInput.value, nextRequest.scalePitch);
+      }
       
     } catch (error) {
       ErrorHandler.logError(error, 'fetchFromBackendReverse');
@@ -458,14 +475,11 @@ export class SurprisalApp {
   }
 
   async fetchModelAvailability() {
-    console.log('Fetching model availability...');
     try {
       const response = await fetch('/api/models');
-      console.log('Response status:', response.status);
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Raw response data:', data);
         
         // Only update if we got valid data
         if (data && typeof data === 'object') {
@@ -474,7 +488,6 @@ export class SurprisalApp {
             disabled: data.disabled_models || [],
             all: data.all_models || [...this.models]
           };
-          console.log('Updated model availability:', this.modelAvailability);
         } else {
           console.warn('Invalid data format received:', data);
         }
@@ -588,11 +601,6 @@ export class SurprisalApp {
     }
 
     // Enhanced debug logging
-    console.log('=== Model Setup Debug ===');
-    console.log('Model availability in setupModels:', this.modelAvailability);
-    console.log('Available models:', this.modelAvailability?.available);
-    console.log('Disabled models:', this.modelAvailability?.disabled);
-    console.log('All models from config:', this.models);
 
     for (const modelName of this.models) {
       try {
@@ -605,10 +613,7 @@ export class SurprisalApp {
                           this.modelAvailability.disabled && 
                           this.modelAvailability.disabled.includes(modelName);
         
-        console.log(`Model ${modelName}: isDisabled = ${isDisabled}`);
-        
         if (isDisabled) {
-          console.log(`Setting up ${modelName} as DISABLED`);
           button.classList.add('disabled');
           button.setAttribute('title', 'NOT IN DEMO');
           button.setAttribute('aria-label', `${modelName} model - unavailable in demo`);
@@ -625,7 +630,6 @@ export class SurprisalApp {
           
           // No click handler for disabled models
         } else {
-          console.log(`Setting up ${modelName} as ENABLED`);
           button.setAttribute('aria-label', `${modelName} model`);
           button.setAttribute('tabindex', '0');
           
@@ -660,7 +664,6 @@ export class SurprisalApp {
         ErrorHandler.logError(error, 'model creation');
       }
     }
-    console.log('=== End Model Setup Debug ===');
   }
 
   setupKeyboard() {

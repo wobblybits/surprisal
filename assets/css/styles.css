@@ -1074,3 +1074,11 @@ strong {
   letter-spacing: 0.025em;
   color: inherit;
 }
+
+#buttons .active-button {
+  --active-color: lightpink;
+  --active-width: 2px;
+  border: 2px outset purple !important;
+  box-shadow: var(--active-width) var(--active-width) 0 var(--active-color), calc(-1 * var(--active-width)) calc(-1 * var(--active-width)) 0 var(--active-color), var(--active-width) calc(-1 * var(--active-width)) 0 var(--active-color), calc(-1 * var(--active-width)) var(--active-width) 0 var(--active-color);
+  background-blend-mode: difference;
+}
