@@ -100,5 +100,3 @@ More detailed attributions are included at the bottom of the main html file.
 ## ❤️ Appreciation
 
 Built with ❤️ at the [Recurse Center](https://www.recurse.com/).
-
-All rights reserved.
