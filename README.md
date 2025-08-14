@@ -1,4 +1,5 @@
 # Surprisal Calculator WM7±2
+![https://www.recurse.com/](https://img.shields.io/badge/created%20at-recurse%20center-white)
 
 > Converting the surprisingness of language into musical compositions
 
@@ -55,16 +56,6 @@ The first time you run it, the transformers library will download and cache the 
 │   └── utilities.js          # Helper functions and error handling
 ├── templates/wireframe.html   # Main UI template
 ├── requirements.txt          # Python dependencies
-├── api-docs.yaml            # OpenAPI specification
-├── docker/                  # Docker deployment files
-│   ├── Dockerfile           # Production container
-│   ├── Dockerfile.minimal
-│   ├── docker-compose.yml
-│   ├── docker-compose.dev.yml
-│   ├── nginx.conf
-│   ├── run-production.sh
-│   ├── run-development.sh
-│   └── README.md
 └── .env.example
 ```
 

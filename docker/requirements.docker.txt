@@ -1,5 +1,0 @@
-# Include all base requirements
--r ../requirements.txt
-
-# Docker-specific dependencies
-redis>=4.5.0 
