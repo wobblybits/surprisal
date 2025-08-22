@@ -21,6 +21,7 @@
   --bg-scales: #ddddff;           /* Scale buttons */
   --bg-models: #ffeeff;           /* Model buttons */
   --bg-instruments: #777799;      /* Instrument buttons */
+  --bg-button-active: rgb(168, 155, 253);    /* currently selected buttons */
   --bg-keyboard-white: white;      /* White keys */
   --bg-keyboard-black: black;      /* Black keys */
   --bg-keyboard-hover: pink;       /* Key hover (white) */
@@ -1075,10 +1076,32 @@ strong {
   color: inherit;
 }
 
-#calculator:hover #buttons .active-button {
+/* #calculator:hover #buttons .active-button {
   --active-color: lightpink;
   --active-width: 2px;
   border: 2px outset purple !important;
   box-shadow: var(--active-width) var(--active-width) 0 var(--active-color), calc(-1 * var(--active-width)) calc(-1 * var(--active-width)) 0 var(--active-color), var(--active-width) calc(-1 * var(--active-width)) 0 var(--active-color), calc(-1 * var(--active-width)) var(--active-width) 0 var(--active-color);
   background-blend-mode: difference;
+} */
+
+#calculator [role="button"] {
+  box-shadow: 0 3px;
+}
+
+#calculator [role="button"].active-button {
+  animation-name: bounce;
+  animation-duration: 0.3s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes bounce {
+  0% { 
+    transform: translateY(0);
+    box-shadow: 0 3px;
+  }
+  100% { 
+    transform: translateY(2px);
+    box-shadow: 0 1px;
+    filter: brightness(70%) saturate(130%);
+  }
 }
